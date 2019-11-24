@@ -11,7 +11,7 @@ yarn && yarn dev
 
 ## Test
 
-````bash
+```bash
 yarn && yarn test
 ```
 

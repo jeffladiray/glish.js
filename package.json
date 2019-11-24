@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "$(yarn bin)/nodemon",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "test": "$(yarn bin)/mocha -r ts-node/register tests/**/*.test.ts",
     "build": "rm -rf ./build && tsc",
     "start": "yarn build && node build/index.js"
   },

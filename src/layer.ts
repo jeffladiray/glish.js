@@ -23,15 +23,8 @@ export class Layer<T extends Cell> {
     return this._matrix[y][x];
   }
 
-  iterate (iterationCallbackCell: (a: T) => {}, iterationCallbackOnNewRow: () => {}) {
-    return this._matrix.map(
-      (c: Array<T>) => {
-        iterationCallbackOnNewRow();
-        return c.map((d: T) => {
-          iterationCallbackCell(d);
-        });
-      }
-    );
+  getMatrix(): Array<Array<T>> {
+    return this._matrix
   }
 
   getCellById(id: number): T {

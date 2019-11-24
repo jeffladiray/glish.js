@@ -8,8 +8,8 @@ describe('Map', () => {
     expect(map.cellWidth).equal(5);
     expect(map.cellHeight).equal(5);
   });
-  it('#biomeLayer', () => {
+  it('#getBiomeLayer', () => {
     let map = new Map({ size: 10, cellW: 5, cellH: 5, seed: 'jeff' });
-    expect(map.biomeLayer.getCellAt(0, 0).biome.type).to.equal('OCEAN_BIOME');
+    expect(map.getBiomeLayer().getCellAt(0, 0).biome.type).to.equal('OCEAN_BIOME');
   }); 
 });

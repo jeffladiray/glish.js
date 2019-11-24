@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "chalk": "^3.0.0",
+    "jimp": "^0.8.5",
     "simplex-noise": "^2.4.0"
   }
 }

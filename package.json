@@ -1,0 +1,22 @@
+{
+  "name": "glish.js",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "$(yarn bin)/nodemon",
+    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "build": "rm -rf ./build && tsc",
+    "start": "yarn build && node build/index.js"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.12.11",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "nodemon": "^1.19.4",
+    "ts-node": "^8.5.2",
+    "typescript": "^3.7.2"
+  }
+}

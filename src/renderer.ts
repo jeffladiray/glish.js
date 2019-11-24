@@ -27,41 +27,45 @@ export class Renderer {
   }
 
   async renderBiomeLayerAsImg(filename: string) {
-    const biomesImages = await Promise.all(BIOME_ARRAY.map(async (biome: Biome) => Jimp.read(`${__dirname}/../assets/${biome.resource}`)));
-    const finalArray = biomesImages.map((params: Jimp, i: number): any => {
-      return {
-        type: BIOME_ARRAY[i].type,
-        pixelValues: params
-      }
-    });
-    const res = this.map.cellHeight;
-    new Jimp(
-      this.map.size * res,
-      this.map.size * res, 
-      (err, image) => {
-        if(err) throw err;
-        this.map.getBiomeLayer().getMatrix().map((c: Array<BiomeCell>) => 
-          c.map((bc: BiomeCell) => {
-            const texture = finalArray.indexOf(finalArray.find((d: any) => { return d.type === bc.biome.type }));
-            if (texture < 0) {
-              throw new Error('Missing texture !')
-            }
-            for(let i = 0; i < res; i++) {
-              for(let j = 0; j < res; j++) {
-                image.setPixelColor(
-                  finalArray[texture].pixelValues.getPixelColor(i, j),
-                  bc.x * res + i,
-                  bc.y * res + j,
-                );
-              } 
-            }
-          })
-        );
+    return new Promise(async (done) => {
+      const biomesImages = await Promise.all(BIOME_ARRAY.map(async (biome: Biome) => Jimp.read(`${__dirname}/../assets/${biome.resource}`)));
+      const finalArray = biomesImages.map((params: Jimp, i: number): any => {
+        return {
+          type: BIOME_ARRAY[i].type,
+          pixelValues: params
+        }
+      });
+      const res = this.map.cellSize;
 
-        image.write(`build/${filename}`, (err) => {
-          if (err) throw err;
-        });
-      }
-    );
+      new Jimp(
+        this.map.size * res,
+        this.map.size * res, 
+        (err, image) => {
+          if(err) throw err;
+          this.map.getBiomeLayer().getMatrix().map((c: Array<BiomeCell>) => 
+            c.map((bc: BiomeCell) => {
+              const texture = finalArray.indexOf(finalArray.find((d: any) => { return d.type === bc.biome.type }));
+              if (texture < 0) {
+                throw new Error('Missing texture !')
+              }
+              for(let i = 0; i < res; i++) {
+                for(let j = 0; j < res; j++) {
+                  image.setPixelColor(
+                    finalArray[texture].pixelValues.getPixelColor(i, j),
+                    bc.x * res + i,
+                    bc.y * res + j,
+                  );
+                } 
+              }
+            })
+          );
+  
+          image.write(`build/${filename}`, (err) => {
+            if (err) throw err;
+            done();
+          });
+        }
+      );
+    })
   }
 }

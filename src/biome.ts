@@ -43,13 +43,12 @@ export const BIOME_ARRAY: Array<Biome> = [
 ]
 
 export class BiomeCell extends Cell {
-  private _noiseBaseFrequency: number;
-  private static _noiseGenerator: any = new S('parameters.seed');
+  private static _noiseGenerator: any = new S('Seedless...orNot');
+  private static _noiseBaseFrequency: number = 64;
   elevation: number;
   biome: Biome;
   constructor(id: number, config: { x: number, y: number }) {
     super(id, config);
-    this._noiseBaseFrequency = 128;
     const x = config.x;
     const y = config.y
     this.elevation = 
@@ -63,10 +62,15 @@ export class BiomeCell extends Cell {
     this.biome = this.computeBiome(this.elevation);
   }
 
+  static setBiomeCellParameters(freq: number, seed: string) {
+    BiomeCell._noiseBaseFrequency = freq;
+    BiomeCell._noiseGenerator = new S(seed);
+  }
+
   computeNoiseWithFrequency(x: number, y: number, octave = 0): number {
     return (1 / 2 ** octave) * BiomeCell._noiseGenerator.noise2D(
       // eslint-disable-next-line no-mixed-operators
-      2 ** octave * x / this._noiseBaseFrequency, 2 ** octave * y / this._noiseBaseFrequency,
+      2 ** octave * x / BiomeCell._noiseBaseFrequency, 2 ** octave * y / BiomeCell._noiseBaseFrequency,
     );
   }
 

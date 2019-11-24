@@ -3,14 +3,15 @@ import { BiomeCell } from './biome'
 
 export class Map {
   size: number;
-  cellHeight: number;
-  cellWidth: number;
+  baseFrequency: number;
+  cellSize: number;
   biomeLayer: Layer<BiomeCell>;
-  constructor(parameters: { size: number, cellH: number, cellW: number, seed: string }) {
+  constructor(parameters: { size: number, baseFrequency: number, cellSize: number, seed: string }) {
     this.size = parameters.size;
-    this.cellHeight = parameters.cellH;
-    this.cellWidth = parameters.cellW;
+    this.baseFrequency = parameters.baseFrequency;
+    this.cellSize = parameters.cellSize;
     this.biomeLayer = new Layer('biome', parameters.size);
+    BiomeCell.setBiomeCellParameters(this.baseFrequency, parameters.seed);
     this.biomeLayer.initWith(BiomeCell);
   }
   

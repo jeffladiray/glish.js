@@ -17,16 +17,51 @@ export class Map {
   }
 }
 
-const OCEAN_BIOME = 'OCEAN_BIOME';
-const DIRT_BIOME = 'DIRT_BIOME';
-const SAND_BIOME = 'SAND_BIOME';
-const FOREST_BIOME = 'FOREST_BIOME';
+export class Biome {
+  type: string;
+  color: { r: number, g: number, b: number };
+  is: (elevation: number) => {};
+  constructor(type: string, color: { r: number, g: number, b: number }, is: (elevation: number) => {}) {
+    this.type = type;
+    this.color = color;
+    this.is = is;
+  }
+
+  serialize() {
+    return {
+      type: this.type,
+    };
+  }
+}
+
+const BIOME_ARRAY: Array<Biome> = [
+  new Biome(
+    'OCEAN_BIOME',
+    { r: 17, g: 36, b: 62 },
+    (elevation) => elevation >= 0 && elevation <= 0.4,
+  ),
+  new Biome(
+    'BEACH_BIOME',
+    { r: 17, g: 36, b: 62 },
+    (elevation) => elevation >= 0.4 && elevation <= 0.6,
+  ),
+  new Biome(
+    'GRASS_BIOME',
+    { r: 17, g: 36, b: 62 },
+    (elevation) => elevation >= 0.6 && elevation <= 0.8,
+  ),
+  new Biome(
+    'MOUNTAIN_BIOME',
+    { r: 17, g: 36, b: 62 },
+    (elevation) => elevation >= 0.8,
+  ),
+]
 
 class BiomeCell extends Cell {
   private _noiseBaseFrequency: number;
   private static _noiseGenerator: any = new S('parameters.seed');
   elevation: number;
-  biome: string;
+  biome: Biome;
   constructor(id: number, config: { x: number, y: number }) {
     super(id, config);
     this._noiseBaseFrequency = 128;
@@ -50,14 +85,13 @@ class BiomeCell extends Cell {
     );
   }
 
-  computeBiome(elevation: number): string {
-    if (elevation > 0.75) {
-      return OCEAN_BIOME;
-    } else if (elevation > 0.5) {
-      return SAND_BIOME;
-    } else if (elevation > 0.25) {
-      return DIRT_BIOME;
-    } 
-    return FOREST_BIOME;
+  computeBiome(elevation: number): Biome {
+    const f = BIOME_ARRAY.find((b: Biome) => {
+      return b.is(this.elevation);
+    });    
+    if (!f) {
+      throw new Error('Error, biome has invalid elevation');
+    }
+    else return f;
   }
 }

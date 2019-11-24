@@ -1,14 +1,49 @@
-import { Matrix } from './matrix';
 import { Cell } from './cell';
+
 export class Layer<T extends Cell> {
-  cellMatrix: Matrix<T>;
+  private _matrix: Array<Array<T>>;
   type: string;
-  constructor(type = 'default', size: number) {
-    this.cellMatrix = new Matrix(size);
+  size: number;
+
+  constructor(type: string, size: number) {
+    this._matrix = new Array(new Array<T>());
+    this.size = size;
     this.type = type;
   }
-  init(CellConstructor: new () => T) {
-    this.cellMatrix.initWith(CellConstructor);
+
+  initWith(CellConstructor: new (...params: any) => T) {
+    let matrix = new Array(this.size).fill(new Array(this.size).fill(new CellConstructor(0, { x: 0, y: 0 })));
+    this._matrix = matrix.map((c: Array<T>, i: number) => c.map((d: T, j: number) => new CellConstructor( j + this.size * i, { x: j, y: i })))
+  }
+
+  getCellAt(x: number, y: number): T {
+    if (x >= this.size || y >= this.size) {
+      throw new Error('Invalid x or y parameter');
+    }
+    return this._matrix[y][x];
+  }
+
+  iterate (iterationCallbackCell: (a: T) => {}, iterationCallbackOnNewRow: () => {}) {
+    return this._matrix.map(
+      (c: Array<T>) => {
+        iterationCallbackOnNewRow();
+        return c.map((d: T) => {
+          iterationCallbackCell(d);
+        });
+      }
+    );
+  }
+
+  getCellById(id: number): T {
+    return this.getCellAt(id % this.size, Math.floor(id / this.size));
+  }
+
+  toJSON() {
+    return {
+      matrix: this._matrix,
+      size: this.size,
+      type: this.type
+    }
   }
 }
 

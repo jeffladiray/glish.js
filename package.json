@@ -24,5 +24,9 @@
     "hooks": {
       "pre-push": "npm test"
     }
+  },
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "simplex-noise": "^2.4.0"
   }
 }

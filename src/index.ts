@@ -1,9 +1,9 @@
 import { Map } from './map';
 import { Renderer } from './renderer';
 
-const SIZE = 512;
+const SIZE = 16;
 const FREQ = 256;
-const CELL_SIZE = 8;
+const CELL_SIZE = 32;
 const SEED = `${+Date.now()}`;
 
 const a = +Date.now();

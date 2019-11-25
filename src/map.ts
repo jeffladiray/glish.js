@@ -1,5 +1,6 @@
 import { Layer } from './layer';
 import { BiomeCell } from './biome'
+import { RegionTagger } from './region';
 
 export class Map {
   size: number;
@@ -13,6 +14,8 @@ export class Map {
     this.biomeLayer = new Layer('biome', parameters.size);
     BiomeCell.setBiomeCellParameters(this.baseFrequency, parameters.seed);
     this.biomeLayer.initWith(BiomeCell);
+    const regionTagger = new RegionTagger<BiomeCell>(this.biomeLayer, (a: BiomeCell, b: BiomeCell) => a.biome.type === b.biome.type);
+    regionTagger.findRegions(regionTagger.layer);
   }
   
   getBiomeLayer(): Layer<BiomeCell> {

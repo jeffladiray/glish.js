@@ -21,7 +21,7 @@ export class Map {
     this.borders = this.regions.reduce((acc: Array<Array<BiomeCell>>, r1: Region<BiomeCell>) => {
       this.regions.forEach((r2: Region<BiomeCell>) => {
         const border = r1.findCommonEdges(r2);  
-        if(border && border.length > 0) {
+        if(border && border.length > 0 && r1 !== r2) {
           acc.push(border);
         }
       });

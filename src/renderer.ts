@@ -78,7 +78,7 @@ export class Renderer {
           return { x: 0, y: 3 * cs };
         };
     }
-    return { x: 0, y: 0 };
+    return { x: cs, y: 0 };
   }
 
   async renderBiomeLayerAsImg(filename: string) {
@@ -106,28 +106,32 @@ export class Renderer {
           this.map.regions.forEach((r1: Region<BiomeCell>) => {
             r1.content.forEach((bc: BiomeCell) => {
               const texture = basicBiomes.indexOf(basicBiomes.find((d: any) => { return d.type === bc.biome.type }));
-              image.blit(basicBiomes[texture].pixelValues, bc.x * res, bc.y * res);
+                image.blit(basicBiomes[texture].pixelValues, bc.x * res, bc.y * res);  
             });
           });
 
           this.map.borders.forEach((bca: Array<BiomeCell>) => {
             bca.forEach((bc: BiomeCell) => {
               let neighbours = [];
-              let ts = g2mTileset;
-  
-              if(bc.biome.type === 'OCEAN_BIOME') {
-                ts = o2bTileset;
-                neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'BEACH_BIOME');
-              } else if (bc.biome.type === 'BEACH_BIOME') {
-                ts = b2gTileset;
-                neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'GRASS_BIOME');
-              } else if (bc.biome.type === 'GRASS_BIOME') {
-                ts = g2mTileset;
-                neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'MOUNTAIN_BIOME');
+              let ts = o2bTileset;
+              if(bc.biome.type !== 'MOUNTAIN_BIOME') {
+                if(bc.biome.type === 'OCEAN_BIOME') {
+                  ts = o2bTileset;
+                  neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'BEACH_BIOME');
+                } else if (bc.biome.type === 'BEACH_BIOME') {
+                  ts = b2gTileset;
+                  neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'GRASS_BIOME');
+                } else if (bc.biome.type === 'GRASS_BIOME') {
+                  ts = g2mTileset;
+                  neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'MOUNTAIN_BIOME');
+                }
+                const tileneighbours = neighbours.reduce((acc: string, bc : { position: string, bc: BiomeCell}) => acc += bc.position, '');
+                const tilesetXY = this.getXYFromNeighbours(tileneighbours);
+                image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res);
+              } else {
+                const texture = basicBiomes.indexOf(basicBiomes.find((d: any) => { return d.type === bc.biome.type }));
+                image.blit(basicBiomes[texture].pixelValues, bc.x * res, bc.y * res);  
               }
-              const tileneighbours = neighbours.reduce((acc: string, bc : { position: string, bc: BiomeCell}) => acc += bc.position, '');
-              const tilesetXY = this.getXYFromNeighbours(tileneighbours);
-              image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res)  
             });
           });
           // this.map.getBiomeLayer().getMatrix().map((c: Array<BiomeCell>) => 

@@ -18,8 +18,8 @@ export class Region<T extends Cell> {
   findCommonEdges(r: Region<T>): Array<T> {
     return r.edges.reduce((acc: Array<T>, e1: T) => {
       this.edges.forEach((e2: T) => {
-        if(Math.abs(e1.x - e2.x) <= 1 || Math.abs(e1.y - e2.y) <= 1) {
-          acc.push(e2);
+        if(Math.abs(e1.x - e2.x) <= 1 && Math.abs(e1.y - e2.y) <= 1) {
+          acc.push(e1);
         }
       });
       return acc;

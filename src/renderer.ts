@@ -58,18 +58,18 @@ export class Renderer {
       };
     } else if(n.length >= 2) {
       switch(true) {
-        case /([NE]{2})/g.test(n):
-          return { x: 2 * cs, y: cs }; 
-        case /([SE]{2})/g.test(n):
-            return { x: 2 * cs , y: 3 * cs };
-        case /([NW]{2})/g.test(n):
-          return { x: 0, y: cs };
-        case /([SW]{2})/g.test(n):
-          return { x: 0, y: 3 * cs };
         case /([NS]{2,3})/g.test(n):
-          return { x: 3 * cs, y: cs };
+            return { x: 3 * cs, y: cs };
         case /([EW]{2,3})/g.test(n):
             return { x: 3 * cs, y: 2 * cs };
+        case /([N,E]{2})/g.test(n):
+          return { x: 2 * cs, y: cs }; 
+        case /([S,E]{2})/g.test(n):
+            return { x: 2 * cs , y: 3 * cs };
+        case /([N,W]{2})/g.test(n):
+          return { x: 0, y: cs };
+        case /([S,W]{2})/g.test(n):
+          return { x: 0, y: 3 * cs };
         };
     }
     return { x: 0, y: 0 };

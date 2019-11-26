@@ -27,17 +27,17 @@ export const BIOME_ARRAY: Array<Biome> = [
   ),
   new Biome(
     'BEACH_BIOME',
-    (elevation) => elevation >= 0.4 && elevation <= 0.6,
+    (elevation) => elevation >= 0.4 && elevation <= 0.75,
     { resource: 'b.png' }
   ),
   new Biome(
     'GRASS_BIOME',
-    (elevation) => elevation >= 0.6 && elevation <= 0.8,
+    (elevation) => elevation >= 0.75 && elevation <= 0.9,
     { resource: 'g.png' }
   ),
   new Biome(
     'MOUNTAIN_BIOME',
-    (elevation) => elevation >= 0.8,
+    (elevation) => elevation >= 0.9,
     { resource: 'm.png' }
   ),
 ]

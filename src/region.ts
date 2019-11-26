@@ -2,10 +2,28 @@ import { Layer } from './layer';
 import { Cell } from './cell';
 
 export class Region<T extends Cell> {
-  content: Array<T> = [];
-  edges: Array<T> = [];
+  content: Array<T> = new Array<T>();
+  edges: Array<T> = new Array<T>();
+  borderWith: Array<Region<T>> = new Array<Region<T>>();
   constructor(content: Array<T>) {
     this.content = content;
+  }
+
+  addBorderRegions(r: Region<T>) {
+    if(!this.borderWith.find((b: Region<T>) => b.borderWith !== r.borderWith)) {
+      this.borderWith.push(r);
+    }
+  }
+
+  findCommonEdges(r: Region<T>): Array<T> {
+    return r.edges.reduce((acc: Array<T>, e1: T) => {
+      this.edges.forEach((e2: T) => {
+        if(Math.abs(e1.x - e2.x) <= 1 || Math.abs(e1.y - e2.y) <= 1) {
+          acc.push(e2);
+        }
+      });
+      return acc;
+    }, new Array<T>());
   }
 
   addEdge(c: T) {
@@ -20,6 +38,10 @@ export class Region<T extends Cell> {
   
   isInRegion(t: T) {
     return this.content.find((c: T) => c.id === t.id);
+  }
+
+  isInEdges(t: T) {
+    return this.edges.find((c: T) => c.id === t.id);
   }
 
   first(): T {
@@ -48,8 +70,8 @@ export class RegionTagger<T extends Cell> {
   }
 
   DFS(layer: Layer<T>, row: number, col: number, visited: Array<Region<T>>) {
-    const rowNbr: Array<number> = [ -1, -1, -1, 0, 0, 1, 1, 1 ]; 
-    const colNbr: Array<number> = [ -1, 0, 1, -1, 1, -1, 0, 1 ];
+    const rowNbr: Array<number> = [ 0, 1, 0 ,-1];
+    const colNbr: Array<number> = [ 1, 0, -1, 0];
     const visitingCell = layer.getCellAt(row, col);
     let currentRegion = visited[visited.length - 1];
     
@@ -59,13 +81,12 @@ export class RegionTagger<T extends Cell> {
       && this.isSameRegion(visitingCell, visited[visited.length - 1].first())
     ) {
       currentRegion.addContent(visitingCell);
-      
     } else {
       currentRegion = new Region([ visitingCell ] );
       visited.push(currentRegion);
     }
     
-    for (let k = 0; k < 8; k++) {
+    for (let k = 0; k < 4; k++) {
       if (this.isSafe(this.layer, row + rowNbr[k], col + colNbr[k], visited)) {
         if (!this.isVisited(this.layer, row + rowNbr[k], col + colNbr[k], visited)) {
           if(this.isSameRegion(visitingCell, layer.getCellAt(row + rowNbr[k], col + colNbr[k]))) {

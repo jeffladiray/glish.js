@@ -5,8 +5,8 @@ import S from 'simplex-noise';
 export class Biome {
   type: string;
   is: (elevation: number) => {};
-  resource: string;
-  constructor(type: string, is: (elevation: number) => {}, extras: { resource: string }) {
+  resource: number;
+  constructor(type: string, is: (elevation: number) => {}, extras: { resource: number }) {
     this.type = type;
     this.is = is;
     this.resource = extras.resource;
@@ -22,23 +22,24 @@ export class Biome {
 export const BIOME_ARRAY: Array<Biome> = [
   new Biome(
     'OCEAN_BIOME',
+    
     (elevation) => elevation >= 0 && elevation <= 0.4,
-    { resource: 'w.png' }
+    { resource: 0 }
   ),
   new Biome(
     'BEACH_BIOME',
     (elevation) => elevation >= 0.4 && elevation <= 0.75,
-    { resource: 'b.png' }
+    { resource: 1 }
   ),
   new Biome(
     'GRASS_BIOME',
     (elevation) => elevation >= 0.75 && elevation <= 0.9,
-    { resource: 'g.png' }
+    { resource: 2 }
   ),
   new Biome(
     'MOUNTAIN_BIOME',
     (elevation) => elevation >= 0.9,
-    { resource: 'm.png' }
+    { resource: 2 }
   ),
 ]
 

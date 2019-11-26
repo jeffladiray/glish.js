@@ -2,7 +2,7 @@ import { Biome, BiomeCell, BIOME_ARRAY } from '../src/biome';
 
 import { expect } from 'chai';
 
-const biome = new Biome('TEST_BIOME', (elevation) => { return elevation > 0 }, { resource: 'fake.png' });
+const biome = new Biome('TEST_BIOME', (elevation) => { return elevation > 0 }, { resource: 0 });
 
 
 describe('Biome', () => {

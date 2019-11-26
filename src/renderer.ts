@@ -45,26 +45,34 @@ export class Renderer {
 
   getXYFromNeighbours(n: string): { x: number, y: number } {
     const cs = this.map.cellSize;
-    switch(n) {
-      case 'N':
-        return { x: cs, y: cs }; 
-      case 'S':
-          return { x: cs, y: 3 * cs };
-      case 'E':
-        return { x: 2 * cs , y: 2 * cs };
-      case 'W':
-        return { x: 0, y: 2 * cs };
-      case 'EN' || 'NE': 
-        return { x: 2 * cs, y: cs };
-      case 'WN' || 'NW': 
-        return { x: 0, y: cs };  
-      case 'ES' || 'SE':
-        return { x: 2 * cs , y: 3 * cs };  
-      case 'WS' || 'SW':
-        return { x: 0, y: 3 * cs };
-      default:
-        return { x: cs, y: 0 }
+    if(n.length === 1) {
+      switch(n) {
+        case 'N':
+          return { x: cs, y: cs }; 
+        case 'S':
+            return { x: cs, y: 3 * cs };
+        case 'E':
+          return { x: 2 * cs , y: 2 * cs };
+        case 'W':
+          return { x: 0, y: 2 * cs };
+      };
+    } else if(n.length >= 2) {
+      switch(true) {
+        case /([NE]{2})/g.test(n):
+          return { x: 2 * cs, y: cs }; 
+        case /([SE]{2})/g.test(n):
+            return { x: 2 * cs , y: 3 * cs };
+        case /([NW]{2})/g.test(n):
+          return { x: 0, y: cs };
+        case /([SW]{2})/g.test(n):
+          return { x: 0, y: 3 * cs };
+        case /([NS]{2,3})/g.test(n):
+          return { x: 3 * cs, y: cs };
+        case /([EW]{2,3})/g.test(n):
+            return { x: 3 * cs, y: 2 * cs };
+        };
     }
+    return { x: 0, y: 0 };
   }
 
   async renderBiomeLayerAsImg(filename: string) {

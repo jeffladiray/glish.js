@@ -118,7 +118,7 @@ export class Renderer {
                   image.blit(g2mTileset, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res)
                 else
                   image.blit(basicBiomes[texture].pixelValues, bc.x * res, bc.y * res);
-              }else {
+              } else {
                 image.blit(basicBiomes[texture].pixelValues, bc.x * res, bc.y * res);
               }
             })

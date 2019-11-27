@@ -103,27 +103,27 @@ export class Renderer {
               image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res);
             });
           });
-
-          this.map.borders.forEach((bca: Array<BiomeCell>) => {
-            bca.forEach((bc: BiomeCell) => {
-              let neighbours = [];
-              if(bc.biome.type !== 'MOUNTAIN_BIOME') {
-                if(bc.biome.type === 'OCEAN_BIOME') {
-                  neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'BEACH_BIOME');
-                } else if (bc.biome.type === 'BEACH_BIOME') {
-                  neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'GRASS_BIOME');
-                } else if (bc.biome.type === 'GRASS_BIOME') {
-                  neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'MOUNTAIN_BIOME');
-                }
-                const tileneighbours = neighbours.reduce((acc: string, bc : { position: string, bc: BiomeCell}) => acc += bc.position, '');
-                const tilesetXY = this.getXYFromNeighbours(tileneighbours, bc.biome.resource);
-                image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res);
-              } else {
-                const tilesetXY = this.getXYFromNeighbours('azqsd', bc.biome.resource);
-                image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res);
-              }
-            });
-          });
+          // Was used to simulate border ... switching to client side rendering will be easier
+          // this.map.borders.forEach((bca: Array<BiomeCell>) => {
+          //   bca.forEach((bc: BiomeCell) => {
+          //     let neighbours = [];
+          //     if(bc.biome.type !== 'MOUNTAIN_BIOME') {
+          //       if(bc.biome.type === 'OCEAN_BIOME') {
+          //         neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'BEACH_BIOME');
+          //       } else if (bc.biome.type === 'BEACH_BIOME') {
+          //         neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'GRASS_BIOME');
+          //       } else if (bc.biome.type === 'GRASS_BIOME') {
+          //         neighbours = this.getNeighbours(bc).filter((n: { position: string, cell: BiomeCell}) => n.cell.biome.type === 'MOUNTAIN_BIOME');
+          //       }
+          //       const tileneighbours = neighbours.reduce((acc: string, bc : { position: string, bc: BiomeCell}) => acc += bc.position, '');
+          //       const tilesetXY = this.getXYFromNeighbours(tileneighbours, bc.biome.resource);
+          //       image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res);
+          //     } else {
+          //       const tilesetXY = this.getXYFromNeighbours('azqsd', bc.biome.resource);
+          //       image.blit(ts, bc.x * res, bc.y * res, tilesetXY.x, tilesetXY.y, res, res);
+          //     }
+          //   });
+          // });
           // this.map.getBiomeLayer().getMatrix().map((c: Array<BiomeCell>) => 
           //   c.map((bc: BiomeCell) => {
           //     const texture = basicBiomes.indexOf(basicBiomes.find((d: any) => { return d.type === bc.biome.type }));

@@ -13,6 +13,7 @@ export class Map {
     this.size = parameters.size;
     this.baseFrequency = parameters.baseFrequency;
     this.cellSize = parameters.cellSize;
+    
     this.biomeLayer = new Layer('biome', parameters.size);
     BiomeCell.setBiomeCellParameters(this.baseFrequency, parameters.seed);
     this.biomeLayer.initWith(BiomeCell);
@@ -22,6 +23,17 @@ export class Map {
       this.regions.forEach((r2: Region<BiomeCell>) => {
         const border = r1.findCommonEdges(r2);  
         if(border && border.length > 0 && r1 !== r2) {
+          border.map((b: BiomeCell) => {
+            const neighbours = this.biomeLayer.getCellNeighbours(b);
+            b.setContent(
+              neighbours.map((bc : { position: string, cell: BiomeCell }) => {
+                return {
+                  position: bc.position,
+                  biome: bc.cell.biome.type,
+                }
+              })
+            );
+          })
           acc.push(border);
         }
       });

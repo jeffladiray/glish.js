@@ -1,30 +1,126 @@
 <html>
   <head>
-    
+    <style>
+    .cell {
+      width: 16px;
+      height: 16px;
+    }
+    .ocean {
+      background-image: url('/w.png');
+    }
+    .beach {
+      background-image: url('/b.png');
+    }
+    .grass {
+      background-image: url('/g.png');
+    }
+    .mountain {
+      background-image: url('/m.png');
+    }
+    </style>
   </head>
   <body>
     <script type="text/javascript">
+      var style = document.createElement('style');
+      style.type = 'text/css';
+      const biomeInterfaces = ['oceanToBeach', 'beachToGrass', 'grassToMountain'];
+      biomeInterfaces.forEach((biomeInterface, k) => {
+        for(let i = 0; i < 5; i++) {
+          for(let j = 0; j < 4; j++) {
+            style.innerHTML += `.${biomeInterface}${i}-${j} {
+              background: url('/ts.png') -${k * 5 * 16 + i * 16}px -${j * 16}px;
+            }\n`;
+          }
+        }
+      });
+
+      document.head.appendChild(style);
+
       window.fetch('/map').then((response) => {
         return response.json();
-      }).then((data) => {
+      })
+      .then((data) => {
         const map = document.createElement('div');
         console.warn(data);
-        
+        const getCardinalWithBiomeName = (bc, neighbours) => {
+          return neighbours
+          .filter(n => n.biome !== bc.biome.type)
+          .reduce((acc, n) => {
+            return acc += n.position;
+          }, '');
+        }
+        const getXYTile = (n) => {
+          if(n.length === 0) {
+            return { x: 1, y: 0 };
+          }    
+          if(n.length === 1) {
+            switch(n) {
+              case 'N':
+                return { x: 1, y: 1 }; 
+              case 'S':
+                  return { x: 1, y: 3 };
+              case 'E':
+                return { x: 2 , y: 2 };
+              case 'W':
+                return { x: 0, y: 2 };
+            };
+          } else if(n.length >= 2) {
+            switch(true) {
+              case /([NS]{2,3})/g.test(n):
+                  return { x: 3, y: 1 };
+              case /([EW]{2,3})/g.test(n):
+                  return { x: 3, y: 2 };
+              case /([N,E]{2})/g.test(n):
+                return { x: 2, y: 1 }; 
+              case /([S,E]{2})/g.test(n):
+                  return { x: 2 , y: 3 };
+              case /([N,W]{2})/g.test(n):
+                return { x: 0, y: 1 };
+              case /([S,W]{2})/g.test(n):
+                return { x: 0, y: 3 };
+              };
+          }
+          return { x: 2, y: 0 };
+        }
+
+        const getClassName = (from, to, cardinal) => {
+          const xy = getXYTile(cardinal);
+          if(from === "OCEAN_BIOME" && to === "BEACH_BIOME") {
+            return `cell oceanToBeach${xy.x}-${xy.y}`;
+          } else if(from === "BEACH_BIOME" && to === "GRASS_BIOME") {
+            return `cell beachToGrass${xy.x}-${xy.y}`;
+          } else if(from === "GRASS_BIOME" && to === "MOUNTAIN_BIOME") {
+            return `cell grassToMountain${xy.x}-${xy.y}`;
+          } else if (from === 'OCEAN_BIOME') {
+            from = 'cell ocean';
+          } else if (from === 'BEACH_BIOME') {
+            from = 'cell beach';
+          } else if (from === 'GRASS_BIOME') {
+            from = 'cell grass';
+          } else if (from === 'MOUNTAIN_BIOME') {
+            from = 'cell mountain';
+          }
+          return from;
+        };
+
         data.biomeLayer.matrix.forEach((row, i) => {
           const r = document.createElement('div');
           map.appendChild(r);
           row.forEach((cell, j) => {
+
             const c = document.createElement('img');
-            if (cell.biome.type === 'OCEAN_BIOME') {
-              c.src = '/w.png';
-            } else if (cell.biome.type === 'BEACH_BIOME') {
-              c.src = '/b.png';
-            } else if (cell.biome.type === 'GRASS_BIOME') {
-              c.src = '/g.png';
-            } else if (cell.biome.type === 'MOUNTAIN_BIOME') {
-              c.src = '/m.png';
+
+            c.className = getClassName(cell.biome.type,'', '');
+            const isInBorder = data.borders.find((bd) => {
+              return bd.find((e) => e.id === cell.id);
+            })
+            if(cell.content && cell.content.length > 0 && isInBorder) {
+              const to = cell.content.filter(p => p.biome !== cell.biome.type)[0];
+              if(to) c.className = `cell ${getClassName(cell.biome.type, to.biome, getCardinalWithBiomeName(cell, cell.content))}`;
+
             }
-            r.appendChild(c);
+            r.appendChild(c); 
+            
           });
         });
         document.body.appendChild(map);
@@ -34,3 +130,4 @@
     </script>
   </body>
 </html>
+

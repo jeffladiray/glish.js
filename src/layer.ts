@@ -31,6 +31,28 @@ export class Layer<T extends Cell> {
     return this.getCellAt(id % this.size, Math.floor(id / this.size));
   }
 
+  getCellNeighbours(b: T): Array<{ position: string, cell: T}> {
+    let neighbourgs = new Array();
+    if (b.x + 1 < this.size) {
+      const E = this.getCellAt(b.x + 1, b.y);
+      neighbourgs.push({ position: 'E', cell: E, });
+    }
+    if (b.x - 1 > 0) {
+      const W = this.getCellAt(b.x - 1, b.y);
+      neighbourgs.push({ position: 'W', cell: W });
+    }
+    if (b.y + 1 < this.size) {
+      const S = this.getCellAt(b.x, b.y + 1);
+      neighbourgs.push({ position: 'S', cell: S });
+    }
+    if (b.y - 1 > 0) {
+      const N = this.getCellAt(b.x, b.y - 1);
+      neighbourgs.push({ position: 'N', cell: N });
+    }    
+    return neighbourgs;
+  }
+
+
   toJSON() {
     return {
       matrix: this._matrix,

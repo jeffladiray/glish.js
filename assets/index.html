@@ -4,18 +4,9 @@
     .cell {
       width: 16px;
       height: 16px;
-    }
-    .ocean {
-      background-image: url('/w.png');
-    }
-    .beach {
-      background-image: url('/b.png');
-    }
-    .grass {
-      background-image: url('/g.png');
-    }
-    .mountain {
-      background-image: url('/m.png');
+      margin:0;
+      padding: 0;
+      border: none;
     }
     </style>
   </head>
@@ -92,13 +83,13 @@
           } else if(from === "GRASS_BIOME" && to === "MOUNTAIN_BIOME") {
             return `cell grassToMountain${xy.x}-${xy.y}`;
           } else if (from === 'OCEAN_BIOME') {
-            from = 'cell ocean';
+            from = 'cell oceanToBeach1-0';
           } else if (from === 'BEACH_BIOME') {
-            from = 'cell beach';
+            from = 'cell beachToGrass1-0';
           } else if (from === 'GRASS_BIOME') {
-            from = 'cell grass';
+            from = 'cell grassToMountain1-0';
           } else if (from === 'MOUNTAIN_BIOME') {
-            from = 'cell mountain';
+            from = 'cell grassTomountain2-0';
           }
           return from;
         };

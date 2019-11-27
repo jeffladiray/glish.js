@@ -2,10 +2,9 @@ import express, { Request, Response } from 'express';
 
 import { Map } from './src/map';
 import { Renderer } from './src/renderer';
-import { resolve } from 'dns';
 
-const SIZE = 32;
-const FREQ = 128;
+const SIZE = 128;
+const FREQ = 256;
 const CELL_SIZE = 16;
 const SEED = `${+Date.now()}`;
 const PORT = '8096';

@@ -1,6 +1,6 @@
 # Glish.js
 
-![output](https://github.com/jeffladiray/glish.js/blob/master/.github/output.png)
+![output](./.github/output.png)
 
 
 Glish.js is a typescript test project that generate random maps.

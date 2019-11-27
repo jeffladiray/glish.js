@@ -1,6 +1,10 @@
 # Glish.js
 
-![output](./.github/output.png)
+<div style="text-align:center">  
+  
+  <img src="./.github/output.png" width="350" height="350" />
+
+</div>
 
 
 Glish.js is a typescript test project that generate random maps.

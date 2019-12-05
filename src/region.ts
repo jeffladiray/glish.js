@@ -69,9 +69,9 @@ export class RegionTagger<T extends Cell> {
     return !(this.isSafe && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(row, col)))))
   }
 
-  DFS(layer: Layer<T>, row: number, col: number, visited: Array<Region<T>>) {
-    const rowNbr: Array<number> = [ 0, 1, 0 ,-1];
-    const colNbr: Array<number> = [ 1, 0, -1, 0];
+  DFS(layer: Layer<T>, row: number, col: number, visited: Array<Region<T>>): any {
+    const rowNbr: Array<number> = [ 0, 0, 1, 1, 1, -1, -1, -1 ];
+    const colNbr: Array<number> = [ -1, 1, -1, 1, 0, 0, 1, -1 ];
     const visitingCell = layer.getCellAt(row, col);
     let currentRegion = visited[visited.length - 1];
     
@@ -86,7 +86,7 @@ export class RegionTagger<T extends Cell> {
       visited.push(currentRegion);
     }
     
-    for (let k = 0; k < 4; k++) {
+    for (let k = 0; k < 8; k++) {
       if (this.isSafe(this.layer, row + rowNbr[k], col + colNbr[k], visited)) {
         if (!this.isVisited(this.layer, row + rowNbr[k], col + colNbr[k], visited)) {
           if(this.isSameRegion(visitingCell, layer.getCellAt(row + rowNbr[k], col + colNbr[k]))) {
@@ -108,7 +108,7 @@ export class RegionTagger<T extends Cell> {
     let visited = new Array<Region<T>>();
     for (let i = 0; i < layer.size; i++) {
       for (let j = 0; j < layer.size; j++) { 
-        if (layer.getCellAt(i, j) && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(i, j))))) {
+        if (layer.getCellAt(i, j) && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(i, j))))) {          
           this.DFS(layer, i, j, visited);
         }
       }

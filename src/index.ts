@@ -1,23 +1,15 @@
 import express, { Request, Response } from 'express';
 
-import { Map } from './src/map';
-import { Renderer } from './src/renderer';
+import { Map } from './map';
 
-const SIZE = 128;
-const FREQ = 256;
+const SIZE = 32;
+const FREQ = 128;
 const CELL_SIZE = 16;
 const SEED = `${+Date.now()}`;
 const PORT = '8096';
 const a = +Date.now();
 const m = new Map({ size: SIZE, baseFrequency: FREQ, cellSize: CELL_SIZE, seed: SEED });
 console.log(`Map created in ${+Date.now() - a}ms`);
-const r = new Renderer(m);
-
-(async () => {
-  // await r.renderBiomeLayerAsConsole();
-  await r.renderBiomeLayerAsImg('output.png');
-  console.log(`Rendered in ${+Date.now() - a}ms`);
-})();
 
 const app = express();
 app.use(express.static(`${__dirname}/assets`));

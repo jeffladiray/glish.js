@@ -1,7 +1,6 @@
 import { BiomeCell } from '../src/biome';
 import { Map } from '../src/map';
 import { RegionTagger } from '../src/region';
-import { Renderer } from '../src/renderer';
 
 import { expect } from 'chai';
 

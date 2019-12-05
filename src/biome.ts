@@ -33,12 +33,12 @@ export const BIOME_ARRAY: Array<Biome> = [
   ),
   new Biome(
     'GRASS_BIOME',
-    (elevation) => elevation >= 0.75 && elevation <= 0.9,
+    (elevation) => elevation >= 0.75 && elevation <= 0.99,
     { resource: 2 }
   ),
   new Biome(
     'MOUNTAIN_BIOME',
-    (elevation) => elevation >= 0.9,
+    (elevation) => elevation >= 0.99,
     { resource: 2 }
   ),
 ]

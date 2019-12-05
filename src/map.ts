@@ -26,7 +26,7 @@ export class Map {
           border.map((b: BiomeCell) => {
             const neighbours = this.biomeLayer.getCellNeighbours(b);
             b.setContent(
-              neighbours.map((bc : { position: string, cell: BiomeCell }) => {
+              neighbours.filter((bc : { position: string, cell: BiomeCell }) => bc.cell.biome.type !== b.biome.type).map((bc : { position: string, cell: BiomeCell }) => {
                 return {
                   position: bc.position,
                   biome: bc.cell.biome.type,

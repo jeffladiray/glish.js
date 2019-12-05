@@ -1,0 +1,159 @@
+<html>
+  <head>
+    <style>
+    .cell {
+      width: 16px;
+      height: 16px;
+      margin:0;
+      padding: 0;
+      border: none;
+      outline: none;
+      display: inline-block;
+    }
+    </style>
+  </head>
+  <body>
+    <p id="cellDetails"></p>
+    <script type="text/javascript">
+      var style = document.createElement('style');
+      style.type = 'text/css';
+      const biomeInterfaces = ['oceanToBeach', 'beachToGrass', 'grassToMountain'];
+      biomeInterfaces.forEach((biomeInterface, k) => {
+        for(let i = 0; i < 5; i++) {
+          for(let j = 0; j < 4; j++) {
+            style.innerHTML += `.${biomeInterface}${i}-${j} {
+              background: url('/ts.png') -${k * 5 * 16 + i * 16}px -${j * 16}px;
+            }\n`;
+          }
+        }
+      });
+
+      document.head.appendChild(style);
+
+      window.fetch('/map').then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        const map = document.createElement('div');
+        console.warn(data);
+        const getCardinalWithBiomeName = (bc, neighbours) => {
+          return neighbours
+          .filter(n => n.biome !== bc.biome.type)
+          .reduce((acc, n) => {
+            return acc += n.position;
+          }, '');
+        }
+
+        const getXYFromNeighbours = (cell) => {
+          const nghs = cell.content;
+          if (nghs) {
+            const card = nghs.sort((n1, n2) => n1.position.length < n2.position.length).reduce((acc, v) => {
+              return !acc.includes(v.position) ? acc += v.position : acc;
+            }, '').replace(/[\s\S](?=([\s\S]+))/g, function(c, s) {
+              return s.indexOf(c) + 1 ? '' : c;
+            });;
+            if (nghs.length === 0) {
+              return { x: 1, y: 0 };
+            } else if (nghs.length === 1) {
+              if (card.match(/[N|W]{2}/)) { return { x: 3, y: 2 }; }
+                else if (card.match(/[N|E]{2}/)) { return { x: 4, y: 2 }; }
+                else if (card.match(/[S|W]{2}/)) { return { x: 3, y: 3 }; }
+                else if (card.match(/[S|E]{2}/)) { return  { x: 4, y: 3 }; }
+                else if (card.includes('N')) { return { x: 1, y: 1 }; }
+                else if (card.includes('S')) { return { x: 1, y: 3 }; }
+                else if (card.includes('W')) { return  { x: 0, y: 2 };}
+                else if (card.includes('E')) { return { x: 2, y: 2 }; }
+            } else if (nghs.length === 2) {
+              const dominant = nghs.find(n => n.position.length === 1);
+              if(dominant) {
+                const d = dominant.position;
+                if (d.includes('N')) { return { x: 1, y: 1 }; }
+                else if (d.includes('S')) { return { x: 1, y: 3 }; }
+                else if (d.includes('W')) { return { x: 0, y: 2 }; }
+                else if (d.includes('E')) { return  { x: 2, y: 2 };}
+              }
+            } else if (nghs.length === 3) {
+              if (card.length > 2) {
+                // Line shape
+                if (!card.includes('N')) { return { x: 1, y: 3 }; }
+                else if (!card.includes('S')) { return { x: 1, y: 1 }; }
+                else if (!card.includes('W')) { return  { x: 2, y: 2 };}
+                else if (!card.includes('E')) { return { x: 0, y: 2 }; }
+              } else {
+                // Angle shape
+                if (card.match(/[NW]{2}/)) { return { x: 0, y: 1 }; }
+                else if (card.match(/[NE]{2}/)) { return { x: 2, y: 1 }; }
+                else if (card.match(/[SW]{2}/)) { return { x: 0, y: 3 }; }
+                else if (card.match(/[SE]{2}/)) { return { x: 2, y: 3 }; }
+                else { return { x: 1, y: 0 }; }
+              }
+            } else if (nghs.length >= 4 && nghs.length < 6) {
+              // L Shape
+              const dominants = nghs.filter(n => n.position.length === 1);
+              if(dominants) {
+                const ds = dominants.map(d => d.position).join('');
+                if(nghs.length === 5) {
+                    if (ds.match(/[NS]{2}/)) { return { x: 3, y: 1 }; }
+                    else if (ds.match(/[EW]{2}/)) { return { x: 3, y: 0 }; }
+                }
+                if (ds.match(/[NW]{2}/)) { return { x: 0, y: 1 }; }
+                else if (ds.match(/[NE]{2}/)) { return { x: 2, y: 1 }; }
+                else if (ds.match(/[SW]{2}/)) { return { x: 0, y: 3 }; }
+                else if (ds.match(/[SE]{2}/)) { return  { x: 2, y: 3 }; }
+              }
+            } else if(nghs.length > 5) {
+              return { x: 0, y: 0 };
+            }
+            return { x: 1, y: 0 };
+          }
+        };
+
+        const getClassName = (from, to, xy) => {
+          if(from === "OCEAN_BIOME" && to === "BEACH_BIOME") {
+            return `cell oceanToBeach${xy.x}-${xy.y}`;
+          } else if(from === "BEACH_BIOME" && to === "GRASS_BIOME") {
+            return `cell beachToGrass${xy.x}-${xy.y}`;
+          } else if(from === "GRASS_BIOME" && to === "MOUNTAIN_BIOME") {
+            return `cell grassToMountain${xy.x}-${xy.y}`;
+          } else if (from === 'OCEAN_BIOME') {
+            from = 'cell oceanToBeach1-0';
+          } else if (from === 'BEACH_BIOME') {
+            from = 'cell beachToGrass1-0';
+          } else if (from === 'GRASS_BIOME') {
+            from = 'cell grassToMountain1-0';
+          } else if (from === 'MOUNTAIN_BIOME') {
+            from = 'cell grassTomountain2-0';
+          }
+          return from;
+        };
+
+        data.biomeLayer.matrix.forEach((row, i) => {
+          const r = document.createElement('div');
+          map.appendChild(r);
+          row.forEach((cell, j) => {
+
+            const c = document.createElement('div');
+            c.onclick = () => {
+              document.getElementById('cellDetails').innerHTML = JSON.stringify(cell);
+            }
+            c.className = getClassName(cell.biome.type,'', '');
+            const isInBorder = data.borders.find((bd) => {
+              return bd.find((e) => e.id === cell.id);
+            })
+            if(cell.content && cell.content.length > 0 && isInBorder) {
+              const to = cell.content.filter(p => p.biome !== cell.biome.type)[0];
+              if(to) c.className = `${getClassName(cell.biome.type, to.biome, getXYFromNeighbours(cell))}`;
+
+            }
+            r.appendChild(c); 
+            
+          });
+        });
+        document.body.appendChild(map);
+      }).catch((err) => {
+        console.log(err);
+      });
+    </script>
+  </body>
+</html>
+

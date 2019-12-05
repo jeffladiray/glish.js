@@ -57,22 +57,17 @@ export class RegionTagger<T extends Cell> {
     this.isSameRegion = isSameRegion;
   }
 
-  isSafe(layer: Layer<T>, row: number, col: number, visited: Array<Region<T>>): boolean {
-    return row >= 0 
-      && row < layer.size
-      && col >= 0
-      && col < layer.size
-      && !!layer.getCellAt(row, col);
+  isSafe(layer: Layer<T>, cell: T, visited: Array<Region<T>>): boolean {
+      return !!cell;
   }
 
-  isVisited(layer: Layer<T>, row: number, col: number, visited: Array<Region<T>>): boolean {
-    return !(this.isSafe && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(row, col)))))
+  isVisited(layer: Layer<T>, cell: T, visited: Array<Region<T>>): boolean {
+    return !(this.isSafe && !(visited.find((r: Region<T>) => r.isInRegion(cell))));
   }
 
-  DFS(layer: Layer<T>, row: number, col: number, visited: Array<Region<T>>): any {
-    const rowNbr: Array<number> = [ 0, 0, 1, 1, 1, -1, -1, -1 ];
-    const colNbr: Array<number> = [ -1, 1, -1, 1, 0, 0, 1, -1 ];
-    const visitingCell = layer.getCellAt(row, col);
+  DFS(layer: Layer<T>, visitingCell: T, visited: Array<Region<T>>) {
+    const rowNbr: Array<number> = [ 0, 1, 0 ,-1];
+    const colNbr: Array<number> = [ 1, 0, -1, 0];
     let currentRegion = visited[visited.length - 1];
     
     if (
@@ -85,22 +80,20 @@ export class RegionTagger<T extends Cell> {
       currentRegion = new Region([ visitingCell ] );
       visited.push(currentRegion);
     }
-    
-    for (let k = 0; k < 8; k++) {
-      if (this.isSafe(this.layer, row + rowNbr[k], col + colNbr[k], visited)) {
-        if (!this.isVisited(this.layer, row + rowNbr[k], col + colNbr[k], visited)) {
-          if(this.isSameRegion(visitingCell, layer.getCellAt(row + rowNbr[k], col + colNbr[k]))) {
-            this.DFS(this.layer, row + rowNbr[k], col + colNbr[k], visited);
-          } else {
+    const nghs = layer.getCellNeighbours(visitingCell);
+    nghs.forEach((ngh: { position: string, cell: T }) => {
+      if (this.isSafe(this.layer, ngh.cell, visited)) {
+        if (!this.isVisited(this.layer, ngh.cell, visited)) {
+          if(!this.isSameRegion(visitingCell, ngh.cell)) {
             currentRegion.addEdge(visitingCell);
           }
         } else {
-          if(!this.isSameRegion(visitingCell, layer.getCellAt(row + rowNbr[k], col + colNbr[k]))) {
+          if(!this.isSameRegion(visitingCell, ngh.cell)) {
             currentRegion.addEdge(visitingCell);
           }
         }
       }
-    }
+    });
     return visited;
   }
 
@@ -108,8 +101,8 @@ export class RegionTagger<T extends Cell> {
     let visited = new Array<Region<T>>();
     for (let i = 0; i < layer.size; i++) {
       for (let j = 0; j < layer.size; j++) { 
-        if (layer.getCellAt(i, j) && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(i, j))))) {          
-          this.DFS(layer, i, j, visited);
+        if (layer.getCellAt(i, j) && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(i, j))))) {
+          this.DFS(layer, layer.getCellAt(i, j), visited);
         }
       }
     }

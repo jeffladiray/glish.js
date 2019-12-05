@@ -1,4 +1,5 @@
 import { Cell } from './cell';
+import { firebrick } from 'color-name';
 
 export class Layer<T extends Cell> {
   private _matrix: Array<Array<T>>;
@@ -9,6 +10,16 @@ export class Layer<T extends Cell> {
     this._matrix = new Array(new Array<T>());
     this.size = size;
     this.type = type;
+  }
+
+  *[Symbol.iterator]() {
+    let i = 0;
+    let j = 0;
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
+        yield this.getCellAt(i, j);
+      }
+    }
   }
 
   initWith(CellConstructor: new (...params: any) => T) {
@@ -32,22 +43,23 @@ export class Layer<T extends Cell> {
   }
 
   getCellNeighbours(b: T): Array<{ position: string, cell: T}> {
+    
     let neighbourgs = new Array();
+    if (b.x - 1 > 0 && b.y - 1 > 0) {
+      const NW = this.getCellAt(b.x - 1, b.y - 1);
+      neighbourgs.push({ position: 'NW', cell: NW });
+    }
+    if (b.x + 1 < this.size && b.y - 1 > 0) {
+      const NE = this.getCellAt(b.x + 1, b.y - 1);
+      neighbourgs.push({ position: 'NE', cell: NE });
+    }
     if (b.x + 1 < this.size && b.y + 1 < this.size) {
       const SE = this.getCellAt(b.x + 1, b.y + 1);
-      neighbourgs.push({ position: 'SE', cell: SE, });
+      neighbourgs.push({ position: 'SE', cell: SE });
     }
-    if (b.x + 1 < this.size && b.y - 1 >= 0) {
-      const NE = this.getCellAt(b.x + 1, b.y - 1);
-      neighbourgs.push({ position: 'NE', cell: NE, });
-    }
-    if (b.x - 1 >= 0 && b.y + 1 < this.size) {
+    if (b.x - 1 > 0 && b.y + 1 < this.size) {
       const SW = this.getCellAt(b.x - 1, b.y + 1);
-      neighbourgs.push({ position: 'SW', cell: SW, });
-    }
-    if (b.x - 1 >= 0 && b.y - 1 >= 0) {
-      const NW = this.getCellAt(b.x - 1, b.y - 1);
-      neighbourgs.push({ position: 'NW', cell: NW, });
+      neighbourgs.push({ position: 'SW', cell: SW });
     }
     if (b.x + 1 < this.size) {
       const E = this.getCellAt(b.x + 1, b.y);

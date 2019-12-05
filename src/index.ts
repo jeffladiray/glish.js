@@ -2,8 +2,8 @@ import express, { Request, Response } from 'express';
 
 import { Map } from './map';
 
-const SIZE = 32;
-const FREQ = 128;
+const SIZE = 64;
+const FREQ = 512;
 const CELL_SIZE = 16;
 const SEED = `${+Date.now()}`;
 const PORT = '8096';
@@ -17,6 +17,9 @@ app.get('/', (req: Request, res: Response) => {
   res.sendFile(`${__dirname}/assets/index.html`);
 });
 app.get('/map', (req: Request, res: Response) => {
+  res.send(m);
+});
+app.get('/biomes', (req: Request, res: Response) => {
   res.send(m);
 });
 

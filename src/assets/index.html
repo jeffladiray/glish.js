@@ -1,7 +1,8 @@
 <html>
   <head>
     <style>
-    .cell {
+
+    .biome {
       width: 16px;
       height: 16px;
       margin:0;
@@ -10,30 +11,66 @@
       outline: none;
       display: inline-block;
     }
+
+    .spawnable {
+      width: 16px;
+      height: 16px;
+      margin:0;
+      padding: 0;
+      border: none;
+      outline: none;
+      display: inline-block;
+    }
+
+    img {
+      display: -moz-inline-box;
+      -moz-box-orient: vertical;
+      display: inline-block;
+      *display: inline;
+      vertical-align: middle;
+      vertical-align: auto;
+      font: 0/0 serif;
+      text-shadow: none;
+      color: transparent;
+      background-size: contain;
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+      box-sizing: border-box;
+    }
     </style>
   </head>
   <body>
     <p id="cellDetails"></p>
     <script type="text/javascript">
-      var style = document.createElement('style');
-      style.type = 'text/css';
-      const biomeInterfaces = ['oceanToBeach', 'beachToGrass', 'grassToMountain'];
-      biomeInterfaces.forEach((biomeInterface, k) => {
-        for(let i = 0; i < 5; i++) {
-          for(let j = 0; j < 4; j++) {
-            style.innerHTML += `.${biomeInterface}${i}-${j} {
-              background: url('/ts.png') -${k * 5 * 16 + i * 16}px -${j * 16}px;
-            }\n`;
-          }
-        }
-      });
 
-      document.head.appendChild(style);
 
       window.fetch('/map').then((response) => {
         return response.json();
       })
       .then((data) => {
+        var style = document.createElement('style');
+        let biomeInterfaces = [];
+        for (let i = 0; i < data.biomes.length; i++) {
+          biomeInterfaces.push(`${(data.biomes[i] || {}).type}${(data.biomes[i + 1] || {}).type}`);
+        }
+        style.type = 'text/css';
+        biomeInterfaces.forEach((biomeInterface, k) => {
+          for(let i = 0; i < 5; i++) {
+            for(let j = 0; j < 4; j++) {
+              style.innerHTML += `.${biomeInterface}${i}-${j} {
+                background: url('/ts.png') -${k * 5 * 16 + i * 16}px -${j * 16}px;
+              }\n`;
+            }
+          }
+        });
+        data.spawnables.forEach((s) => {
+          style.innerHTML += `.${s.type} {
+                background: url('/s.png') -${s.resource * 16}px 0px;
+              }\n`;
+        })
+
+
+        document.head.appendChild(style);
         const map = document.createElement('div');
         console.warn(data);
         const getCardinalWithBiomeName = (bc, neighbours) => {
@@ -110,24 +147,24 @@
 
         const getClassName = (from, to, xy) => {
           if(from === "OCEAN_BIOME" && to === "BEACH_BIOME") {
-            return `cell oceanToBeach${xy.x}-${xy.y}`;
+            return `biome OCEAN_BIOMEBEACH_BIOME${xy.x}-${xy.y}`;
           } else if(from === "BEACH_BIOME" && to === "GRASS_BIOME") {
-            return `cell beachToGrass${xy.x}-${xy.y}`;
+            return `biome BEACH_BIOMEGRASS_BIOME${xy.x}-${xy.y}`;
           } else if(from === "GRASS_BIOME" && to === "MOUNTAIN_BIOME") {
-            return `cell grassToMountain${xy.x}-${xy.y}`;
+            return `biome GRASS_BIOMEMOUNTAIN_BIOME${xy.x}-${xy.y}`;
           } else if (from === 'OCEAN_BIOME') {
-            from = 'cell oceanToBeach1-0';
+            from = 'biome OCEAN_BIOMEBEACH_BIOME1-0';
           } else if (from === 'BEACH_BIOME') {
-            from = 'cell beachToGrass1-0';
+            from = 'biome BEACH_BIOMEGRASS_BIOME1-0';
           } else if (from === 'GRASS_BIOME') {
-            from = 'cell grassToMountain1-0';
+            from = 'biome GRASS_BIOMEMOUNTAIN_BIOME1-0';
           } else if (from === 'MOUNTAIN_BIOME') {
-            from = 'cell grassTomountain2-0';
+            from = 'biome GRASS_BIOMEMOUNTAIN_BIOME2-0';
           }
           return from;
         };
 
-        data.biomeLayer.matrix.forEach((row, i) => {
+        data.map.matrix.forEach((row, i) => {
           const r = document.createElement('div');
           map.appendChild(r);
           row.forEach((cell, j) => {
@@ -145,6 +182,17 @@
               if(to) c.className = `${getClassName(cell.biome.type, to.biome, getXYFromNeighbours(cell))}`;
 
             }
+
+            if(cell.spawnables && cell.spawnables.length > 0) {
+              const w = document.createElement('div');
+              let ca = 'spawnable '
+              cell.spawnables.forEach((s) => {
+                ca += s.type + ' ';
+              })
+              w.className = ca;
+              c.appendChild(w); 
+            }
+
             r.appendChild(c); 
             
           });

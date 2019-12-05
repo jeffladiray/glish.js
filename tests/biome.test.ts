@@ -1,4 +1,4 @@
-import { Biome, BiomeCell, BIOME_ARRAY } from '../src/biome';
+import { Biome } from '../src/constants';
 
 import { expect } from 'chai';
 

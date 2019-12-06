@@ -2,8 +2,8 @@ import express, { Request, Response } from 'express';
 
 import { Map } from './map';
 
-const SIZE = 256;
-const FREQ = 518;
+const SIZE = 128;
+const FREQ = 256;
 const CELL_SIZE = 16;
 const SEED = `${+Date.now()}`;
 const PORT = '8096';

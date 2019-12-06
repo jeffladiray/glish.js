@@ -1,8 +1,8 @@
-import { Biome } from '../src/constants';
+import { Biome, Resource } from '../src/constants';
 
 import { expect } from 'chai';
 
-const biome = new Biome('TEST_BIOME', (elevation) => { return elevation > 0 }, { resource: 0 });
+const biome = new Biome('TEST_BIOME', (elevation) => { return elevation > 0 }, new Resource(0));
 
 
 describe('Biome', () => {

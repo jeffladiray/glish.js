@@ -15,18 +15,47 @@ export class Layer<T extends Cell> {
   *[Symbol.iterator]() {
     let i = 0;
     let j = 0;
-    for (let i = 0; i < this.size; i++) {
-      for (let j = 0; j < this.size; j++) {
+    for (let i = 0; i < this._matrix.length; i++) {
+      for (let j = 0; j < this._matrix[i].length; j++) {
         yield this.getCellAt(i, j);
       }
     }
   }
 
   initWith(CellConstructor: new (...params: any) => T) {
-    let matrix = new Array(this.size).fill(new Array(this.size).fill(new CellConstructor(0, { x: 0, y: 0 })));
-    this._matrix = matrix.map((c: Array<T>, i: number) => c.map((d: T, j: number) => new CellConstructor( j + this.size * i, { x: j, y: i })))
+    if(this.size >= 0) {
+      let matrix = new Array(this.size).fill(new Array(this.size).fill(new CellConstructor(0, { x: 0, y: 0 })));
+      this._matrix = matrix.map((c: Array<T>, i: number) => c.map((d: T, j: number) => new CellConstructor( j + this.size * i, { x: j, y: i })))
+    } else {
+      throw new Error('Invalid size');
+    }
   }
 
+  pushRow(row: Array<T>) {
+    return this._matrix.push(row);
+  }
+
+  addToRowById(id: number, t: T) {
+    const row = this.getCellsBySpec((c: T) => c.id === id);
+    if(row && row.length > 0) {
+      row.push(t);
+    }
+  }
+
+  getCellsBySpec(spcFunc: (c: T) => boolean): Array<T> {
+    const res = new Array<T>();
+    for (const c of this) {
+      if (spcFunc(c)) {
+        res.push(c);
+      }
+    }
+    return res;
+  }
+
+  getRandomCell(): T {
+    return this.getCellAt(Math.floor(Math.random() * this.size), Math.floor(Math.random() * this.size));
+  }
+  
   getCellAt(x: number, y: number): T {
     if (x >= this.size || y >= this.size) {
       throw new Error('Invalid x or y parameter');

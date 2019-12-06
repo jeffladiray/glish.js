@@ -1,6 +1,6 @@
 import { Layer } from './layer';
 import { MapCell } from './mapCell'
-import { BIOME_ARRAY, SPAWN_ARRAY, Biome, Spawnable } from './constants';
+import { BIOME_ARRAY, SPAWN_ARRAY, Biome, Spawnable, R } from './constants';
 import { RegionTagger, Region } from './region';
 
 
@@ -65,8 +65,42 @@ export class Map {
       });
       return acc;
     }, new MapCellMatrix());
+
+    console.log('Compute cities');
+    const cities = this.map.getCellsBySpec((c: MapCell) => !!(c.item && c.item.type === 'CITY_SPAWNABLE'));
+    if(cities.length >= 2) {
+      console.warn(('Building roads'));
+      const setRoad = (from: MapCell, to: MapCell, i: number = 0) => {
+        console.warn(i);
+        
+        if(dist(from, to) <= Math.sqrt(2) || i === this.size || from.biome.type === 'OCEAN_BIOME') {
+          return;
+        } else {
+          const roadCandidates = this.map.getCellNeighbours(from).map((c: { position: string, cell: MapCell }) => c.cell);
+          const selectedAsRoad = roadCandidates.reduce((acc: MapCell, c: MapCell) => {
+            if (dist(c, to) < dist(acc, to) && c.content.elevation < acc.content.elevation) {
+              return c;
+            }
+            return acc;
+          }, roadCandidates[0]);
+          selectedAsRoad.setItem('ROAD_SPAWNABLE', R.ROAD_SPAWNABLE);
+          setRoad(selectedAsRoad, to, i+=1);
+        }
+      } 
+
+      const dist = (c: MapCell, d: MapCell) => {
+        return Math.sqrt((c.x-d.x)*(c.x-d.x) + (c.y-d.y)*(c.y-d.y));
+      };
+
+      for(let i = 0; i < cities.length - 1; i++) {
+        const from = cities[i];
+        const to = cities[i+1];
+        setRoad(from, to);
+      }
+    }
+    
   }
-  
+
   getMap(): Layer<MapCell> {
     return this.map;
   }

@@ -63,9 +63,10 @@
             }
           }
         });
+        
         data.spawnables.forEach((s) => {
           style.innerHTML += `.${s.type} {
-                background: url('/s.png') -${s.resource * 16}px 0px;
+                background: url('/s.png') -${s.resource.position.x * 16}px -${s.resource.position.y * 16}px;
               }\n`;
         })
 

@@ -1,15 +1,15 @@
-import { BIOME_ARRAY, SPAWN_ARRAY, Biome, Spawnable } from './constants';
+import { BIOME_ARRAY, SPAWN_ARRAY, Biome, Spawnable, Resource } from './constants';
 import { Cell } from './cell';
 
 import S from 'simplex-noise';
 import { Layer } from './layer';
 
-class Item {
+class Item  {
   type: string;
-  resource: number;
-  constructor(type: string, resource: number) {
-    this.type = type;
+  resource: Resource;
+  constructor(type: string, resource: Resource) {
     this.resource = resource;
+    this.type = type;
   }
 }
 
@@ -72,5 +72,9 @@ export class MapCell extends Cell {
       this.item = new Item(selectedSpawnable.type, selectedSpawnable.resource);
     }
     return this.spawnables;
+  }
+
+  setItem(type: string, resource: Resource) {
+    this.item = new Item(type, resource);
   }
 }

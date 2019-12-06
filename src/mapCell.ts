@@ -4,11 +4,21 @@ import { Cell } from './cell';
 import S from 'simplex-noise';
 import { Layer } from './layer';
 
+class Item {
+  type: string;
+  resource: number;
+  constructor(type: string, resource: number) {
+    this.type = type;
+    this.resource = resource;
+  }
+}
+
 export class MapCell extends Cell {
   spawnables: Array<Spawnable>;
   private static _noiseGenerator: any = new S('Seedless...orNot');
   private static _noiseBaseFrequency: number = 64;
   biome: Biome;
+  item: Item | null;
   constructor(id: number, config: { x: number, y: number }) {
     super(id, config);
     const x = config.x;
@@ -21,11 +31,16 @@ export class MapCell extends Cell {
             + this.computeNoiseWithFrequency(x, y, 2)
             + this.computeNoiseWithFrequency(x, y, 3)
             + this.computeNoiseWithFrequency(x, y, 4),
-        )
+        ),
+        humidity: Math.abs(
+          this.computeNoiseWithFrequency(x, y)
+
+        ),
       };
     } 
     this.biome = this.computeBiome(this.content.elevation);
     this.spawnables = [];
+    this.item = null;
   }
 
   static setMapCellParameters(freq: number, seed: string) {
@@ -52,6 +67,10 @@ export class MapCell extends Cell {
 
   computeSpawnables(l: Layer<MapCell>) {
     this.spawnables = SPAWN_ARRAY.filter((s) => s.canSpawn(l, this));
+    const selectedSpawnable = this.spawnables[Math.floor(Math.random() * this.spawnables.length)];
+    if(!this.item && selectedSpawnable) {
+      this.item = new Item(selectedSpawnable.type, selectedSpawnable.resource);
+    }
     return this.spawnables;
   }
 }

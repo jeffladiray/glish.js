@@ -183,12 +183,9 @@
 
             }
 
-            if(cell.spawnables && cell.spawnables.length > 0) {
+            if(cell.item) {
               const w = document.createElement('div');
-              let ca = 'spawnable '
-              cell.spawnables.forEach((s) => {
-                ca += s.type + ' ';
-              })
+              let ca = `spawnable ${cell.item.type}`;
               w.className = ca;
               c.appendChild(w); 
             }

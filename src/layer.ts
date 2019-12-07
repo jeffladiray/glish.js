@@ -1,5 +1,4 @@
 import { Cell } from './cell';
-import { firebrick } from 'color-name';
 
 export class Layer<T extends Cell> {
   private _matrix: Array<Array<T>>;
@@ -71,8 +70,14 @@ export class Layer<T extends Cell> {
     return this.getCellAt(id % this.size, Math.floor(id / this.size));
   }
 
-  getCellNeighbours(b: T): Array<{ position: string, cell: T}> {
-    
+  updateLayer(subLayer: Layer<T>, startingId: number) {
+    const initialCell = this.getCellById(startingId);
+    for (const c of subLayer) {
+      this.getCellAt(c.x + initialCell.x, c.y + initialCell.y);
+    }
+  }
+
+  getCellNeighbours(b: T): Array<{ position: string, cell: T}> {    
     let neighbourgs = new Array();
     if (b.x - 1 > 0 && b.y - 1 > 0) {
       const NW = this.getCellAt(b.x - 1, b.y - 1);

@@ -1,4 +1,3 @@
-import { MapCell } from './mapCell';
 import { Layer } from './layer';
 import { Cell } from './cell';
 
@@ -29,8 +28,8 @@ export const R = {
 export class Spawnable {
   type: string;
   resource: Resource;
-  canSpawn: (l: Layer<MapCell>, c: MapCell) => {};
-  constructor(type: string, canSpawn: (l: Layer<MapCell>, c: MapCell) => {}, resource: Resource) {
+  canSpawn: (l: Layer<Cell>, c: Cell) => {};
+  constructor(type: string, canSpawn: (l: Layer<Cell>, c: any) => {}, resource: Resource) {
     this.type = type;
     this.canSpawn = canSpawn;
     this.resource = resource;
@@ -54,20 +53,19 @@ export class Biome {
   }
 }
 
-
 export const SPAWN_ARRAY: Array<Spawnable> = [
-  new Spawnable('OCEAN_ROCK_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return c.content.elevation < 0.1 && Math.random() > 0.99 && c.biome.type === 'OCEAN_BIOME' }, R.OCEAN_HOLE_SPAWNABLE),
-  new Spawnable('BEACH_TREE_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return Math.random() > 0.99 && c.biome.type === 'BEACH_BIOME' }, R.BEACH_TREE_SPAWNABLE),
-  new Spawnable('GRASS_TREE_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return Math.random() > 0.5 && c.content.humidity > 0.75 && c.biome.type === 'GRASS_BIOME'; }, R.GRASS_TREE_SPAWNABLE),
-  new Spawnable('MOUTAIN_ROCK_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return Math.random() > 0.9 && c.biome.type === 'MOUNTAIN_BIOME' }, R.MOUTAIN_ROCK_SPAWNABLE),
-  new Spawnable('OCEAN_HOLE_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return c.content.elevation < 0.1 && Math.random() > 0.991 && c.biome.type === 'OCEAN_BIOME' }, R.OCEAN_HOLE_SPAWNABLE),
-  new Spawnable('BEACH_CACTUS_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return Math.random() > 0.995 && c.biome.type === 'BEACH_BIOME' }, R.BEACH_CACTUS_SPAWNABLE),
-  new Spawnable('GRASS_BERRY_BUSHES_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return Math.random() > 0.99 && c.content.humidity > 0.5 && c.biome.type === 'GRASS_BIOME'; }, R.GRASS_BERRY_BUSHES_SPAWNABLE),
-  new Spawnable('MOUNTAIN_ALT_BACKGROUND_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => { return Math.random() > 0.99 && c.biome.type === 'MOUNTAIN_BIOME'; }, R.MOUNTAIN_ALT_BACKGROUND_SPAWNABLE),
-  new Spawnable('CITY_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => {
+  new Spawnable('OCEAN_ROCK_SPAWNABLE', (l: Layer<Cell>, c) => { return c.raw.elevation < 0.1 && Math.random() > 0.99 && c.biome.type === 'OCEAN_BIOME' }, R.OCEAN_ROCK_SPAWNABLE),
+  new Spawnable('BEACH_TREE_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.5 && c.raw.humidity > 0.75 && c.biome.type === 'BEACH_BIOME' }, R.BEACH_TREE_SPAWNABLE),
+  new Spawnable('GRASS_TREE_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.5 && c.raw.humidity > 0.75 && c.biome.type === 'GRASS_BIOME'; }, R.GRASS_TREE_SPAWNABLE),
+  new Spawnable('MOUTAIN_ROCK_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.9 && c.biome.type === 'MOUNTAIN_BIOME' }, R.MOUTAIN_ROCK_SPAWNABLE),
+  new Spawnable('OCEAN_HOLE_SPAWNABLE', (l: Layer<Cell>, c) => { return c.raw.elevation < 0.1 && Math.random() > 0.991 && c.biome.type === 'OCEAN_BIOME' }, R.OCEAN_HOLE_SPAWNABLE),
+  new Spawnable('BEACH_CACTUS_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.995 && c.biome.type === 'BEACH_BIOME' }, R.BEACH_CACTUS_SPAWNABLE),
+  new Spawnable('GRASS_BERRY_BUSHES_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.99 && c.raw.humidity > 0.5 && c.biome.type === 'GRASS_BIOME'; }, R.GRASS_BERRY_BUSHES_SPAWNABLE),
+  new Spawnable('MOUNTAIN_ALT_BACKGROUND_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.99 && c.biome.type === 'MOUNTAIN_BIOME'; }, R.MOUNTAIN_ALT_BACKGROUND_SPAWNABLE),
+  new Spawnable('CITY_SPAWNABLE', (l: Layer<Cell>, c) => {
     return c.biome.type !== 'OCEAN_BIOME' && Math.random() < 1 / (l.size*3);
   }, R.CITY_SPAWNABLE),
-  new Spawnable('ROAD_SPAWNABLE', (l: Layer<MapCell>, c: MapCell) => {
+  new Spawnable('ROAD_SPAWNABLE', (l: Layer<Cell>, c) => {
     return false;
   }, R.ROAD_SPAWNABLE),
 ];

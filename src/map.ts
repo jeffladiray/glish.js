@@ -1,107 +1,155 @@
 import { Layer } from './layer';
-import { MapCell } from './mapCell'
+import { Cell } from './cell'
 import { BIOME_ARRAY, SPAWN_ARRAY, Biome, Spawnable, R } from './constants';
 import { RegionTagger, Region } from './region';
 
-
-class MapCellMatrix extends Array<Array<MapCell>> { };
+import S from 'simplex-noise';
 
 export class Map {
   size: number;
   baseFrequency: number;
   cellSize: number;
+  map: Layer<Cell>;
+  borders: Array<Array<Cell>>;
+  layers: {
+    raw: Layer<Cell>;
+    biome: Layer<Cell>;
+    item: Layer<Cell>;
+    region: Layer<Cell>;
+  };
   spawnables: Array<Spawnable> = SPAWN_ARRAY;
   biomes: Array<Biome> = BIOME_ARRAY;
-  map: Layer<MapCell>;
-  regions: Array<Region<MapCell>>;
-  borders: Array<any>; 
   constructor(parameters: { size: number, baseFrequency: number, cellSize: number, seed: string }) {
-
-    // Save parameters
     this.size = parameters.size;
     this.baseFrequency = parameters.baseFrequency;
     this.cellSize = parameters.cellSize;
+    this.map = new Layer<Cell>('map', this.size);
+    this.layers = {
+      raw: new Layer<Cell>('raw', this.size),
+      biome: new Layer<Cell>('biome', this.size),
+      item: new Layer<Cell>('items', this.size),
+      region: new Layer<Cell>('regions', this.size),
+    };
     
-    console.log("Creating a new mapcell layer");
-    // Create a new layer to store map cell data
-    this.map = new Layer('map', parameters.size);
-    // Pass frequency & seed to the perlin noise generator
-    MapCell.setMapCellParameters(this.baseFrequency, parameters.seed);
-    // Init the map with MapCell
-    console.log("Init the mapcell layer");
-    this.map.initWith(MapCell);
+    this.layers.raw.initWith(Cell);
+    this.layers.biome.initWith(Cell);
+    this.layers.item.initWith(Cell);
+    this.layers.region.initWith(Cell);
+    this.map.initWith(Cell);
 
-    console.log("Compute spawnables");
-    // Estimate item to spawn
-    for (const mc of this.map) {
-      mc.computeSpawnables(this.map);
+    console.log('Compute initial raw datas ...');
+
+    // generating raw terrain informations
+    const noiseGen = new S(parameters.seed);
+    const computeNoiseWithFrequency = (x: number, y: number, octave = 0): number  => {
+      return (1 / 2 ** octave) * noiseGen.noise2D(
+        // eslint-disable-next-line no-mixed-operators
+        2 ** octave * x / this.baseFrequency, 2 ** octave * y / this.baseFrequency,
+      );
     }
 
-    console.log("Compute regions");
-    // Create a Region Tagger & tag regions with matching biome
-    const regionTagger = new RegionTagger<MapCell>(this.map, (a: MapCell, b: MapCell) => a.biome.type === b.biome.type);
-    this.regions = regionTagger.findRegions(regionTagger.layer);
+    for (const cell of this.layers.raw) {
+      cell.setContent({ 
+        elevation: Math.abs(
+          computeNoiseWithFrequency(cell.x, cell.y)
+            + computeNoiseWithFrequency(cell.x, cell.y, 1)
+            + computeNoiseWithFrequency(cell.x, cell.y, 2)
+            + computeNoiseWithFrequency(cell.x, cell.y, 3)
+            + computeNoiseWithFrequency(cell.x, cell.y, 4),
+        ),
+        humidity: Math.abs(
+          computeNoiseWithFrequency(cell.x, cell.y)
+        ),
+      });
+    }
 
-    console.log("Compute borders");
-    // Analyzing regions to get single sided bprders
-    this.borders = this.regions.reduce((acc: MapCellMatrix, r1: Region<MapCell>) => {
-      this.regions.forEach((r2: Region<MapCell>) => {
+    console.log('Compute biome datas ...');
+    // generating biome info layer
+    const computeBiome = (cell: Cell) => {
+      const f = BIOME_ARRAY.find((b: Biome) => {
+        return b.is(this.layers.raw.getCellById(cell.id).content.elevation);
+      });    
+      if (!f) {
+        throw new Error('Error, biome has invalid elevation');
+      }
+      else return f;
+    };
+
+    for (const cell of this.layers.biome) {
+      cell.setContent(computeBiome(cell));
+    }
+
+    console.log('Compute initial spawnable datas ...');
+    // generating item info layer
+    const computeSpawnables = (l: Layer<Cell>, cellInfo: any) => {
+      const ableToSpawn = SPAWN_ARRAY.filter((s: Spawnable) => s.canSpawn(l, cellInfo));
+      const selectedSpawnable = ableToSpawn[Math.floor(Math.random() * ableToSpawn.length)];
+      if(selectedSpawnable) {
+       return { type: selectedSpawnable.type, resource: selectedSpawnable.resource };
+      }
+      return {};
+    }
+
+    this.layers.item.initWith(Cell);
+    for (const cell of this.layers.item) {
+      cell.setContent(computeSpawnables(this.layers.item, this.getCellDataById(cell.id)));
+    }
+
+    console.log('Compute regions ...');
+    // Calculating borders and regions
+    const regionTagger = new RegionTagger<Cell>(this.layers.biome, (a: Cell, b: Cell) => a.content.type === b.content.type);
+    const regions = regionTagger.findRegions(regionTagger.layer);
+    for (const cell of this.layers.region) {
+      cell.setContent((regions.find((r: Region<Cell>) => r.isInRegion(cell)) || {}).id);
+    }
+
+    this.borders = regions.reduce((acc: Array<Array<Cell>>, r1: Region<Cell>) => {
+      regions.forEach((r2: Region<Cell>) => {
         const border = r1.findCommonEdges(r2);  
         if(border && border.length > 0 && r1 !== r2) {
-          border.map((b: MapCell) => {
-            const neighbours = this.map.getCellNeighbours(b);
-            b.setContent(
-              // Only send neighbours if biome is different
-              neighbours.filter((bc : { position: string, cell: MapCell }) => bc.cell.biome.type !== b.biome.type).map((bc : { position: string, cell: MapCell }) => {
-                return {
-                  position: bc.position,
-                  biome: bc.cell.biome.type,
-                }
-              })
-            );
+          border.map((b: Cell) => {
+            const neighbours = this.layers.biome.getCellNeighbours(b);
+            b.setContent({
+              ...b.content,
+              neighbours: neighbours
+                .filter((bc : { position: string, cell: Cell }) => bc.cell.content.type !== b.content.type)
+                .map((bc : { position: string, cell: Cell }) => {
+                  return {
+                    position: bc.position,
+                    biome: bc.cell.content.type,
+                  }
+                })
+              });
           })
           acc.push(border);
         }
       });
       return acc;
-    }, new MapCellMatrix());
+    }, new Array<Array<Cell>>());
 
-    console.log('Compute cities');
-    const cities = this.map.getCellsBySpec((c: MapCell) => !!(c.item && c.item.type === 'CITY_SPAWNABLE'));
-    if(cities.length >= 2) {
-      console.warn(('Building roads'));
-      const setRoad = (from: MapCell, to: MapCell, i: number = 0) => {
-        console.warn(i);
-        
-        if(dist(from, to) <= Math.sqrt(2) || i === this.size || from.biome.type === 'OCEAN_BIOME') {
-          return;
-        } else {
-          const roadCandidates = this.map.getCellNeighbours(from).map((c: { position: string, cell: MapCell }) => c.cell);
-          const selectedAsRoad = roadCandidates.reduce((acc: MapCell, c: MapCell) => {
-            if (dist(c, to) < dist(acc, to) && c.content.elevation < acc.content.elevation) {
-              return c;
-            }
-            return acc;
-          }, roadCandidates[0]);
-          selectedAsRoad.setItem('ROAD_SPAWNABLE', R.ROAD_SPAWNABLE);
-          setRoad(selectedAsRoad, to, i+=1);
-        }
-      } 
+    console.log('Finalizing map object');
 
-      const dist = (c: MapCell, d: MapCell) => {
-        return Math.sqrt((c.x-d.x)*(c.x-d.x) + (c.y-d.y)*(c.y-d.y));
-      };
-
-      for(let i = 0; i < cities.length - 1; i++) {
-        const from = cities[i];
-        const to = cities[i+1];
-        setRoad(from, to);
-      }
+    // Finally, generate maps from others layers
+    for (const cell of this.map) {
+      cell.setContent(this.getCellDataById(cell.id));
     }
-    
   }
 
-  getMap(): Layer<MapCell> {
-    return this.map;
+  getCellDataById(id: number) {
+    const res = {
+      item: null,
+      region: null,
+      raw: this.layers.raw.getCellById(id).content,
+      biome: this.layers.biome.getCellById(id).content
+    };
+    
+    if(this.layers.item.getCellById(id)) {
+      res.item = this.layers.item.getCellById(id).content
+    }
+
+    if(this.layers.region.getCellById(id)) {
+      res.region = this.layers.region.getCellById(id).content
+    }
+    return res;
   }
 }

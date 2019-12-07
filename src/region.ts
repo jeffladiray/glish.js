@@ -2,11 +2,14 @@ import { Layer } from './layer';
 import { Cell } from './cell';
 
 export class Region<T extends Cell> {
+  static R_COUNTER = 0;
+  id: number;
   content: Array<T> = new Array<T>();
   edges: Array<T> = new Array<T>();
   borderWith: Array<Region<T>> = new Array<Region<T>>();
   constructor(content: Array<T>) {
     this.content = content;
+    this.id = Region.R_COUNTER++;
   }
 
   addBorderRegions(r: Region<T>) {

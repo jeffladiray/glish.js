@@ -58,7 +58,7 @@
           for(let i = 0; i < 5; i++) {
             for(let j = 0; j < 4; j++) {
               style.innerHTML += `.${biomeInterface}${i}-${j} {
-                background: url('/ts.png') -${k * 5 * 16 + i * 16}px -${j * 16}px;
+                background: url('/s2.png') -${k * 5 * 16 + i * 16}px -${j * 16}px;
               }\n`;
             }
           }
@@ -66,7 +66,7 @@
         
         data.spawnables.forEach((s) => {
           style.innerHTML += `.${s.type} {
-                background: url('/s.png') -${s.resource.position.x * 16}px -${s.resource.position.y * 16}px;
+                background: url('/s3.png') -${s.resource.position.x * 16}px -${s.resource.position.y * 16}px;
               }\n`;
         })
 
@@ -83,7 +83,7 @@
         }
 
         const getXYFromNeighbours = (cell) => {
-          const nghs = cell.content;
+          const nghs = cell.content.biome.neighbours;
           if (nghs) {
             const card = nghs.sort((n1, n2) => n1.position.length < n2.position.length).reduce((acc, v) => {
               return !acc.includes(v.position) ? acc += v.position : acc;
@@ -174,19 +174,19 @@
             c.onclick = () => {
               document.getElementById('cellDetails').innerHTML = JSON.stringify(cell);
             }
-            c.className = getClassName(cell.biome.type,'', '');
+            c.className = getClassName(cell.content.biome.type,'', '');
             const isInBorder = data.borders.find((bd) => {
               return bd.find((e) => e.id === cell.id);
-            })
-            if(cell.content && cell.content.length > 0 && isInBorder) {
-              const to = cell.content.filter(p => p.biome !== cell.biome.type)[0];
-              if(to) c.className = `${getClassName(cell.biome.type, to.biome, getXYFromNeighbours(cell))}`;
+            });
 
+            if(cell.content.biome.neighbours && cell.content.biome.neighbours.length > 0 && isInBorder) {
+              const to = cell.content.biome.neighbours.filter(p => p.biome !== cell.content.biome.type)[0];
+              if(to) c.className = `${getClassName(cell.content.biome.type, to.biome, getXYFromNeighbours(cell))}`;
             }
 
-            if(cell.item) {
+            if(cell.content.item) {
               const w = document.createElement('div');
-              let ca = `spawnable ${cell.item.type}`;
+              let ca = `spawnable ${cell.content.item.type}`;
               w.className = ca;
               c.appendChild(w); 
             }

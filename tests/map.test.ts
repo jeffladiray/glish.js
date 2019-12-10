@@ -9,6 +9,6 @@ describe('Map', () => {
   });
   it('#getBiomeLayer', () => {
     let map = new Map({ size: 10, baseFrequency: 10, cellSize: 5, seed: 'jeff' });
-    expect(map.getBiomeLayer().getCellAt(0, 0).biome.type).to.equal('OCEAN_BIOME');
+    expect(map.layers.biome.getCellAt(0, 0).content.type).to.equal('OCEAN_BIOME');
   }); 
 });

@@ -1,8 +1,8 @@
-import { Biome, BiomeCell, BIOME_ARRAY } from '../src/biome';
+import { Biome, Resource } from '../src/constants';
 
 import { expect } from 'chai';
 
-const biome = new Biome('TEST_BIOME', (elevation) => { return elevation > 0 }, { resource: 'fake.png' });
+const biome = new Biome('TEST_BIOME', (elevation) => { return elevation > 0 }, new Resource(0));
 
 
 describe('Biome', () => {

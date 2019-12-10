@@ -13,12 +13,14 @@
     "@types/chai": "^4.2.5",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.11",
+    "@types/express": "^4.17.2",
     "chai": "^4.2.0",
     "husky": "^3.1.0",
     "mocha": "^6.2.2",
     "nodemon": "^1.19.4",
     "ts-node": "^8.5.2",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.2",
+    "typings": "^2.1.1"
   },
   "husky": {
     "hooks": {
@@ -27,6 +29,7 @@
   },
   "dependencies": {
     "chalk": "^3.0.0",
+    "express": "^4.17.1",
     "jimp": "^0.8.5",
     "simplex-noise": "^2.4.0"
   }

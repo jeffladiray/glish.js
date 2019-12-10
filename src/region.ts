@@ -54,61 +54,85 @@ export class Region<T extends Cell> {
 
 export class RegionTagger<T extends Cell> {
   layer: Layer<T>
-  isSameRegion: (t: T, v: T) => {};
-  constructor(layer: Layer<T>, isSameRegion: (t: T, v: T) => {}) {
+  isSameRegion: (t: Cell, v: Cell) => {};
+  constructor(layer: Layer<T>, isSameRegion: (t: Cell, v: Cell) => {}) {
     this.layer = layer;
     this.isSameRegion = isSameRegion;
   }
 
-  isSafe(layer: Layer<T>, cell: T, visited: Array<Region<T>>): boolean {
-      return !!cell;
-  }
-
-  isVisited(layer: Layer<T>, cell: T, visited: Array<Region<T>>): boolean {
-    return !(this.isSafe && !(visited.find((r: Region<T>) => r.isInRegion(cell))));
-  }
-
-  DFS(layer: Layer<T>, visitingCell: T, visited: Array<Region<T>>) {
-    const rowNbr: Array<number> = [ 0, 1, 0 ,-1];
-    const colNbr: Array<number> = [ 1, 0, -1, 0];
-    let currentRegion = visited[visited.length - 1];
-    
-    if (
-      currentRegion
-      && !currentRegion.isInRegion(visitingCell)
-      && this.isSameRegion(visitingCell, visited[visited.length - 1].first())
-    ) {
-      currentRegion.addContent(visitingCell);
-    } else {
-      currentRegion = new Region([ visitingCell ] );
-      visited.push(currentRegion);
-    }
-    const nghs = layer.getCellNeighbours(visitingCell);
-    nghs.forEach((ngh: { position: string, cell: T }) => {
-      if (this.isSafe(this.layer, ngh.cell, visited)) {
-        if (!this.isVisited(this.layer, ngh.cell, visited)) {
-          if(!this.isSameRegion(visitingCell, ngh.cell)) {
-            currentRegion.addEdge(visitingCell);
+  iterativeBFS(layer: Layer<Cell>) {
+    let visited = new Layer<Cell>('visited', layer.size);
+    let currentRegionId = 0;
+    visited.initWith((id: number, x: number, y: number) => new Cell(id, { x, y }, { id: 0 }));
+    while(visited.getCellsBySpec((c: Cell) => c.content.id === 0).length > 0) {
+      let queue = [layer.getCellById(visited.getCellsBySpec((c: Cell) => c.content.id === 0)[0].id)];
+      let currentRegion = [];
+      currentRegionId++;
+      while(queue.length > 0) {
+        const cell = queue.shift();
+        if (cell) {
+          const visitedCell = visited.getCellById(cell.id);
+          if (visitedCell.content.id === 0) {
+            visited.getCellById(cell.id).setContent({ ...visitedCell.content, id: currentRegionId });
+            currentRegion.push(cell);
           }
-        } else {
-          if(!this.isSameRegion(visitingCell, ngh.cell)) {
-            currentRegion.addEdge(visitingCell);
-          }
-        }
-      }
-    });
-    return visited;
-  }
 
-  findRegions(layer: Layer<T>) {
-    let visited = new Array<Region<T>>();
-    for (let i = 0; i < layer.size; i++) {
-      for (let j = 0; j < layer.size; j++) { 
-        if (layer.getCellAt(i, j) && !(visited.find((r: Region<T>) => r.isInRegion(layer.getCellAt(i, j))))) {
-          this.DFS(layer, layer.getCellAt(i, j), visited);
+          const nghs = layer.getCellNeighbours(cell);
+          const nghsNotVisited = nghs.filter((cellA: { position: string, cell: Cell }) =>  visited.getCellById(cellA.cell.id).content.id === 0)
+          nghs.forEach((ngh: { position: string, cell: Cell }) => {
+            if (nghsNotVisited.includes(ngh)) {
+              if (this.isSameRegion(ngh.cell, cell)) {
+                visited.getCellById(ngh.cell.id).setContent({ id: currentRegionId });
+                currentRegion.push(visited);
+                queue.unshift(ngh.cell);
+              } else {
+                const nghsEdges = layer
+                  .getCellNeighbours(cell)
+                  .filter(
+                    (cellA: { position: string, cell: Cell }) =>  !this.isSameRegion(cellA.cell, cell)
+                  );
+                visited.getCellById(cell.id).setContent({ ...visitedCell.content, edges: nghsEdges });
+              }
+            } else {
+              const nghsEdges = layer
+              .getCellNeighbours(cell)
+              .filter(
+                (cellA: { position: string, cell: Cell }) =>  !this.isSameRegion(cellA.cell, cell)
+              );
+              visited.getCellById(cell.id).setContent({ ...visitedCell.content, edges: nghsEdges });
+            }
+          });
         }
       }
     }
+
     return visited;
+  }
+
+
+  recursiveDFS(layer: Layer<Cell>) {
+    let visited = new Layer<Cell>('visited', layer.size);
+    let currentRegionId = 0;
+    visited.initWith((id: number, x: number, y: number) => new Cell(id, { x, y }, { id: 0 }));
+    for (const cell of layer) {
+      if(!visited.getCellById(cell.id).content.id) {
+        currentRegionId++;        
+        this.explore(layer, visited, cell, currentRegionId);
+      }
+    }
+    return visited;
+  }
+
+  explore(layer: Layer<Cell>, visited: Layer<Cell>, cell: Cell, currentRegionId: number) {
+    const visitedCell = visited.getCellById(cell.id);
+    if(visitedCell.content.id === 0) {
+      visited.getCellById(cell.id).setContent({ id: currentRegionId });
+      const nghs = layer.getCellNeighbours(cell);
+      nghs.forEach((ngh: { position: string, cell: Cell }) => {
+        if (visited.getCellById(ngh.cell.id).content.id === 0 && this.isSameRegion(ngh.cell, cell)) {
+          this.explore(layer, visited, ngh.cell, currentRegionId);
+        }
+      });
+    }
   }
 };

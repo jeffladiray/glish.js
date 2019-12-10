@@ -37,10 +37,14 @@
       background-repeat: no-repeat;
       box-sizing: border-box;
     }
+
+    .debug {
+      box-shadow:0px 0px 0px 10px black inset;
+    }
     </style>
   </head>
   <body>
-    <p id="cellDetails"></p>
+    <table id="cellDetails"></table>
     <script type="text/javascript">
 
 
@@ -83,7 +87,7 @@
         }
 
         const getXYFromNeighbours = (cell) => {
-          const nghs = cell.content.biome.neighbours;
+          const nghs = cell.content.region.edges;
           if (nghs) {
             const card = nghs.sort((n1, n2) => n1.position.length < n2.position.length).reduce((acc, v) => {
               return !acc.includes(v.position) ? acc += v.position : acc;
@@ -165,30 +169,44 @@
           return from;
         };
 
+        const generateHTMLFromCell = (cell) => {
+          let k = '<tbody>';
+          k += '<tr>';
+          k += `<td>ID: ${cell.id}</td>`;
+          k += `<td>X: ${cell.x}</td>`;
+          k += `<td>Y: ${cell.y}</td>`;
+          k += `<td>BIOME: ${cell.content.biome.type}</td>`;
+          k += `<td>HEIGHT: ${cell.content.raw.elevation}</td>`;
+          k += `<td>REGION: ${cell.content.region.id}</td>`;
+          k += `<td>ITEM: ${cell.content.item.type || 'NONE'}</td>`;
+          k += '</tr>';
+          k +='</tbody>';
+          return k;
+        }
+
         data.map.matrix.forEach((row, i) => {
           const r = document.createElement('div');
           map.appendChild(r);
+          
           row.forEach((cell, j) => {
 
             const c = document.createElement('div');
+
             c.onclick = () => {
-              document.getElementById('cellDetails').innerHTML = JSON.stringify(cell);
+              document.getElementById('cellDetails').innerHTML = generateHTMLFromCell(cell);
             }
             c.className = getClassName(cell.content.biome.type,'', '');
-            const isInBorder = data.borders.find((bd) => {
-              return bd.find((e) => e.id === cell.id);
-            });
-
-            if(cell.content.biome.neighbours && cell.content.biome.neighbours.length > 0 && isInBorder) {
-              const to = cell.content.biome.neighbours.filter(p => p.biome !== cell.content.biome.type)[0];
-              if(to) c.className = `${getClassName(cell.content.biome.type, to.biome, getXYFromNeighbours(cell))}`;
-            }
 
             if(cell.content.item) {
               const w = document.createElement('div');
               let ca = `spawnable ${cell.content.item.type}`;
               w.className = ca;
               c.appendChild(w); 
+            }
+
+            if(cell.content.region.edges && cell.content.region.edges.length > 0) {
+              const to = cell.content.region.edges.filter(p => p.biome !== cell.content.biome.type)[0];
+              if(to) c.className = `${getClassName(cell.content.biome.type, to.cell.content.type, getXYFromNeighbours(cell))}`;
             }
 
             r.appendChild(c); 

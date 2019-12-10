@@ -4,7 +4,7 @@ import { Cell } from '../src/cell';
 import { expect } from 'chai';
 
 const matrix = new Layer('biome', 5);
-matrix.initWith(Cell);
+matrix.initWith((id, x, y) => new Cell(id, { x, y }, false));
 
 describe('Layer', () => {
   it('#constructor', () => {

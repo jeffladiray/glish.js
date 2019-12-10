@@ -21,10 +21,14 @@ export class Layer<T extends Cell> {
     }
   }
 
-  initWith(CellConstructor: new (...params: any) => T) {
+  initWith(cellFab:(id: number, x: number, y: number) => T) {
     if(this.size >= 0) {
-      let matrix = new Array(this.size).fill(new Array(this.size).fill(new CellConstructor(0, { x: 0, y: 0 })));
-      this._matrix = matrix.map((c: Array<T>, i: number) => c.map((d: T, j: number) => new CellConstructor( j + this.size * i, { x: j, y: i })))
+      let matrix = new Array(this.size).fill(new Array(this.size).fill(0));
+      this._matrix = matrix.map((c: Array<T>, i: number) => {
+        return c.map((d: T, j: number) => {          
+          return cellFab(j + this.size * i, j, i);
+        });
+      });
     } else {
       throw new Error('Invalid size');
     }

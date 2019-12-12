@@ -38,8 +38,20 @@
       box-sizing: border-box;
     }
 
+    .row {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .chunk {
+      width: auto;
+      height: auto;
+      float: left;
+      padding: 1px 1px;
+    }
+
     .debug {
-      box-shadow:0px 0px 0px 10px black inset;
+      box-shadow:inset 0px 0px 0px 10px #f00;
     }
     </style>
   </head>
@@ -179,39 +191,38 @@
           k += `<td>HEIGHT: ${cell.content.raw.elevation}</td>`;
           k += `<td>REGION: ${cell.content.region.id}</td>`;
           k += `<td>ITEM: ${cell.content.item.type || 'NONE'}</td>`;
+          //k += `<td>CARDINAL: ${getCardinalWithBiomeName(cell.content, cell.content.region.edges)}</td>`;
           k += '</tr>';
           k +='</tbody>';
           return k;
         }
+        data.map.content.matrix.forEach(row => {
+          const rowDiv = document.createElement('div');
+            rowDiv.className = 'row';
+            row.forEach((cell, j) => {
 
-        data.map.matrix.forEach((row, i) => {
-          const r = document.createElement('div');
-          map.appendChild(r);
-          
-          row.forEach((cell, j) => {
+              const c = document.createElement('span');
 
-            const c = document.createElement('div');
+              c.onclick = () => {
+                document.getElementById('cellDetails').innerHTML = generateHTMLFromCell(cell);
+              }
+              c.className = getClassName(cell.content.biome.type,'', '');
 
-            c.onclick = () => {
-              document.getElementById('cellDetails').innerHTML = generateHTMLFromCell(cell);
-            }
-            c.className = getClassName(cell.content.biome.type,'', '');
+              if(cell.content.item) {
+                const w = document.createElement('span');
+                let ca = `spawnable ${cell.content.item.type}`;
+                w.className = ca;
+                c.appendChild(w); 
+              }
 
-            if(cell.content.item) {
-              const w = document.createElement('div');
-              let ca = `spawnable ${cell.content.item.type}`;
-              w.className = ca;
-              c.appendChild(w); 
-            }
+              if(cell.content.region.edges && cell.content.region.edges.length > 0) {
+                const to = cell.content.region.edges.filter(p => p.biome !== cell.content.biome.type)[0];
+                if(to) c.className = `${getClassName(cell.content.biome.type, to.cell.content.type, getXYFromNeighbours(cell))}`;
+              }
+              map.appendChild(c);
 
-            if(cell.content.region.edges && cell.content.region.edges.length > 0) {
-              const to = cell.content.region.edges.filter(p => p.biome !== cell.content.biome.type)[0];
-              if(to) c.className = `${getClassName(cell.content.biome.type, to.cell.content.type, getXYFromNeighbours(cell))}`;
-            }
-
-            r.appendChild(c); 
-            
-          });
+            });
+            map.appendChild(document.createElement('br'));
         });
         document.body.appendChild(map);
       }).catch((err) => {

@@ -3,12 +3,13 @@ import { expect } from 'chai';
 
 describe('Map', () => {
   it('#constructor', () => {
-    let map = new Map({ size: 10, baseFrequency: 10, cellSize: 5, seed: 'jeff' });
-    expect(map.size).equal(10);
+    let map = new Map({ sizeW: 10, sizeH: 15, chunkSize: 2, baseFrequency: 10, cellSize: 5, seed: 'glish' });
+    expect(map.chunkSize).equal(2);
     expect(map.cellSize).equal(5);
   });
-  it('#getBiomeLayer', () => {
-    let map = new Map({ size: 10, baseFrequency: 10, cellSize: 5, seed: 'jeff' });
-    expect(map.layers.biome.getCellAt(0, 0).content.type).to.equal('OCEAN_BIOME');
+  it('#computeChunks', () => {
+    let map = new Map({ sizeW: 10, sizeH: 15, chunkSize: 2, baseFrequency: 10, cellSize: 5, seed: 'glish' });
+    console.warn(map);
+    
   }); 
 });

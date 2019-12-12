@@ -3,17 +3,16 @@ import { Cell } from './cell';
 export class Layer<T extends Cell> {
   private _matrix: Array<Array<T>>;
   type: string;
-  size: number;
-
-  constructor(type: string, size: number) {
+  sizeW: number;
+  sizeH: number;
+  constructor(type: string, sizeW: number, sizeH: number) {
     this._matrix = new Array(new Array<T>());
-    this.size = size;
+    this.sizeH = sizeH;
+    this.sizeW = sizeW;
     this.type = type;
   }
 
   *[Symbol.iterator]() {
-    let i = 0;
-    let j = 0;
     for (let i = 0; i < this._matrix.length; i++) {
       for (let j = 0; j < this._matrix[i].length; j++) {
         yield this.getCellAt(i, j);
@@ -22,11 +21,11 @@ export class Layer<T extends Cell> {
   }
 
   initWith(cellFab:(id: number, x: number, y: number) => T) {
-    if(this.size >= 0) {
-      let matrix = new Array(this.size).fill(new Array(this.size).fill(0));
+    if (this.sizeH >= 0 && this.sizeW >= 0) {
+      let matrix = new Array(this.sizeH).fill(new Array(this.sizeW).fill(0));
       this._matrix = matrix.map((c: Array<T>, i: number) => {
         return c.map((d: T, j: number) => {          
-          return cellFab(j + this.size * i, j, i);
+          return cellFab(j + this.sizeW * i, j, i);
         });
       });
     } else {
@@ -56,11 +55,11 @@ export class Layer<T extends Cell> {
   }
 
   getRandomCell(): T {
-    return this.getCellAt(Math.floor(Math.random() * this.size), Math.floor(Math.random() * this.size));
+    return this.getCellAt(Math.floor(Math.random() * this.sizeW), Math.floor(Math.random() * this.sizeH));
   }
   
   getCellAt(x: number, y: number): T {
-    if (x >= this.size || y >= this.size) {
+    if (x >= this.sizeW || y >= this.sizeH) {
       throw new Error('Invalid x or y parameter');
     }
     return this._matrix[y][x];
@@ -71,7 +70,7 @@ export class Layer<T extends Cell> {
   }
 
   getCellById(id: number): T {
-    return this.getCellAt(id % this.size, Math.floor(id / this.size));
+    return this.getCellAt(id % this.sizeW, Math.floor(id / this.sizeW) % this.sizeH);
   }
 
   updateLayer(subLayer: Layer<T>, startingId: number) {
@@ -87,19 +86,19 @@ export class Layer<T extends Cell> {
       const NW = this.getCellAt(b.x - 1, b.y - 1);
       neighbourgs.push({ position: 'NW', cell: NW });
     }
-    if (b.x + 1 < this.size && b.y - 1 > 0) {
+    if (b.x + 1 < this.sizeW && b.y - 1 > 0) {
       const NE = this.getCellAt(b.x + 1, b.y - 1);
       neighbourgs.push({ position: 'NE', cell: NE });
     }
-    if (b.x + 1 < this.size && b.y + 1 < this.size) {
+    if (b.x + 1 < this.sizeW && b.y + 1 < this.sizeH) {
       const SE = this.getCellAt(b.x + 1, b.y + 1);
       neighbourgs.push({ position: 'SE', cell: SE });
     }
-    if (b.x - 1 > 0 && b.y + 1 < this.size) {
+    if (b.x - 1 > 0 && b.y + 1 < this.sizeH) {
       const SW = this.getCellAt(b.x - 1, b.y + 1);
       neighbourgs.push({ position: 'SW', cell: SW });
     }
-    if (b.x + 1 < this.size) {
+    if (b.x + 1 < this.sizeW) {
       const E = this.getCellAt(b.x + 1, b.y);
       neighbourgs.push({ position: 'E', cell: E, });
     }
@@ -107,7 +106,7 @@ export class Layer<T extends Cell> {
       const W = this.getCellAt(b.x - 1, b.y);
       neighbourgs.push({ position: 'W', cell: W });
     }
-    if (b.y + 1 < this.size) {
+    if (b.y + 1 < this.sizeH) {
       const S = this.getCellAt(b.x, b.y + 1);
       neighbourgs.push({ position: 'S', cell: S });
     }
@@ -122,7 +121,8 @@ export class Layer<T extends Cell> {
   toJSON() {
     return {
       matrix: this._matrix,
-      size: this.size,
+      sizeH: this.sizeW,
+      sizeW: this.sizeW,
       type: this.type
     }
   }

@@ -54,14 +54,14 @@ export class Region<T extends Cell> {
 
 export class RegionTagger<T extends Cell> {
   layer: Layer<T>
-  isSameRegion: (t: Cell, v: Cell) => {};
-  constructor(layer: Layer<T>, isSameRegion: (t: Cell, v: Cell) => {}) {
+  isSameRegion: (d: {position: string, cell: T}, v: T) => {};
+  constructor(layer: Layer<T>, isSameRegion: (d: {position: string, cell: T}, v: T) => {}) {
     this.layer = layer;
     this.isSameRegion = isSameRegion;
   }
 
-  iterativeBFS(layer: Layer<Cell>) {
-    let visited = new Layer<Cell>('visited', layer.size);
+  iterativeBFS(layer: Layer<T>) {
+    let visited = new Layer<Cell>('visited', layer.sizeW, layer.sizeH);
     let currentRegionId = 0;
     visited.initWith((id: number, x: number, y: number) => new Cell(id, { x, y }, { id: 0 }));
     while(visited.getCellsBySpec((c: Cell) => c.content.id === 0).length > 0) {
@@ -78,10 +78,10 @@ export class RegionTagger<T extends Cell> {
           }
 
           const nghs = layer.getCellNeighbours(cell);
-          const nghsNotVisited = nghs.filter((cellA: { position: string, cell: Cell }) =>  visited.getCellById(cellA.cell.id).content.id === 0)
-          nghs.forEach((ngh: { position: string, cell: Cell }) => {
+          const nghsNotVisited = nghs.filter((cellA: { position: string, cell: T }) =>  visited.getCellById(cellA.cell.id).content.id === 0)
+          nghs.forEach((ngh: { position: string, cell: T }) => {
             if (nghsNotVisited.includes(ngh)) {
-              if (this.isSameRegion(ngh.cell, cell)) {
+              if (this.isSameRegion(ngh, cell)) {
                 visited.getCellById(ngh.cell.id).setContent({ id: currentRegionId });
                 currentRegion.push(visited);
                 queue.unshift(ngh.cell);
@@ -89,17 +89,26 @@ export class RegionTagger<T extends Cell> {
                 const nghsEdges = layer
                   .getCellNeighbours(cell)
                   .filter(
-                    (cellA: { position: string, cell: Cell }) =>  !this.isSameRegion(cellA.cell, cell)
+                    (cellA: { position: string, cell: T }) =>  !this.isSameRegion(cellA, cell)
                   );
                 visited.getCellById(cell.id).setContent({ ...visitedCell.content, edges: nghsEdges });
               }
             } else {
-              const nghsEdges = layer
-              .getCellNeighbours(cell)
-              .filter(
-                (cellA: { position: string, cell: Cell }) =>  !this.isSameRegion(cellA.cell, cell)
-              );
-              visited.getCellById(cell.id).setContent({ ...visitedCell.content, edges: nghsEdges });
+              if (this.isSameRegion(ngh, cell)) {
+                const nghsEdges = layer
+                .getCellNeighbours(cell)
+                .filter(
+                  (cellA: { position: string, cell: T }) =>  !this.isSameRegion(cellA, cell)
+                );
+                visited.getCellById(cell.id).setContent({ id: currentRegionId, edges: nghsEdges });
+              } else {
+                const nghsEdges = layer
+                .getCellNeighbours(cell)
+                .filter(
+                  (cellA: { position: string, cell: T }) =>  !this.isSameRegion(cellA, cell)
+                );
+                visited.getCellById(cell.id).setContent({ ...visitedCell.content, edges: nghsEdges });
+              }
             }
           });
         }
@@ -110,8 +119,8 @@ export class RegionTagger<T extends Cell> {
   }
 
 
-  recursiveDFS(layer: Layer<Cell>) {
-    let visited = new Layer<Cell>('visited', layer.size);
+  recursiveDFS(layer: Layer<T>) {
+    let visited = new Layer<Cell>('visited', layer.sizeW, layer.sizeH);
     let currentRegionId = 0;
     visited.initWith((id: number, x: number, y: number) => new Cell(id, { x, y }, { id: 0 }));
     for (const cell of layer) {
@@ -123,13 +132,13 @@ export class RegionTagger<T extends Cell> {
     return visited;
   }
 
-  explore(layer: Layer<Cell>, visited: Layer<Cell>, cell: Cell, currentRegionId: number) {
+  explore(layer: Layer<T>, visited: Layer<Cell>, cell: T, currentRegionId: number) {
     const visitedCell = visited.getCellById(cell.id);
     if(visitedCell.content.id === 0) {
       visited.getCellById(cell.id).setContent({ id: currentRegionId });
       const nghs = layer.getCellNeighbours(cell);
-      nghs.forEach((ngh: { position: string, cell: Cell }) => {
-        if (visited.getCellById(ngh.cell.id).content.id === 0 && this.isSameRegion(ngh.cell, cell)) {
+      nghs.forEach((ngh: { position: string, cell: T }) => {
+        if (visited.getCellById(ngh.cell.id).content.id === 0 && this.isSameRegion(ngh, cell)) {
           this.explore(layer, visited, ngh.cell, currentRegionId);
         }
       });

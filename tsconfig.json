@@ -10,7 +10,8 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "sourceMap": true
   },
     "exclude": [
       "**/tests/*.test.ts",

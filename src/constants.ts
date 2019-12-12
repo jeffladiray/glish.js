@@ -39,11 +39,13 @@ export class Spawnable {
 export class Biome {
   type: string;
   is: (elevation: number) => {};
+  file: string;
   resource: Resource;
-  constructor(type: string, is: (elevation: number) => {}, resource: Resource) {
+  constructor(type: string, is: (elevation: number) => {}, resource: Resource, file: string = 'assets/s2.png') {
     this.type = type;
     this.is = is;
     this.resource = resource;
+    this.file = file;
   }
 
   serialize() {
@@ -52,6 +54,7 @@ export class Biome {
     };
   }
 }
+
 
 export const SPAWN_ARRAY: Array<Spawnable> = [
   new Spawnable('OCEAN_ROCK_SPAWNABLE', (l: Layer<Cell>, c) => { return c.raw.elevation < 0.1 && Math.random() > 0.99 && c.biome.type === 'OCEAN_BIOME' }, R.OCEAN_ROCK_SPAWNABLE),
@@ -63,7 +66,7 @@ export const SPAWN_ARRAY: Array<Spawnable> = [
   new Spawnable('GRASS_BERRY_BUSHES_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.99 && c.raw.humidity > 0.5 && c.biome.type === 'GRASS_BIOME'; }, R.GRASS_BERRY_BUSHES_SPAWNABLE),
   new Spawnable('MOUNTAIN_ALT_BACKGROUND_SPAWNABLE', (l: Layer<Cell>, c) => { return Math.random() > 0.99 && c.biome.type === 'MOUNTAIN_BIOME'; }, R.MOUNTAIN_ALT_BACKGROUND_SPAWNABLE),
   new Spawnable('CITY_SPAWNABLE', (l: Layer<Cell>, c) => {
-    return c.biome.type !== 'OCEAN_BIOME' && Math.random() < 1 / (l.size*3);
+    return c.biome.type !== 'OCEAN_BIOME' && Math.random() < 1 / (l.sizeH*3);
   }, R.CITY_SPAWNABLE),
   new Spawnable('ROAD_SPAWNABLE', (l: Layer<Cell>, c) => {
     return false;

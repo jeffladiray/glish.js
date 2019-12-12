@@ -2,7 +2,7 @@
 
 <div style="text-align:center">  
   
-  <img src="./.github/output.png" width="350" height="350" />
+  <img src="./.github/output.png" width="348" height="247" />
 
 </div>
 
@@ -22,6 +22,10 @@ yarn && yarn dev
 ```bash
 yarn && yarn test
 ```
+
+## Infos
+
+I'm currenly on adding eslint & a CLI to ease the dev of the project
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

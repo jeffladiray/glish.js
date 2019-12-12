@@ -9,7 +9,14 @@ const CELL_SIZE = 16;
 const SEED = 'solo'; // `${+Date.now()}`;
 const PORT = '8096';
 const a = +Date.now();
-const m = new Map({ sizeH: SIZE, sizeW: SIZE * 2, chunkSize: CHUNK_SIZE, baseFrequency: FREQ, cellSize: CELL_SIZE, seed: SEED });
+const m = new Map({
+  sizeH: SIZE,
+  sizeW: SIZE * 2,
+  chunkSize: CHUNK_SIZE,
+  baseFrequency: FREQ,
+  cellSize: CELL_SIZE,
+  seed: SEED,
+});
 console.log(`Map created in ${+Date.now() - a}ms`);
 
 const app = express();
@@ -26,5 +33,5 @@ app.get('/biomes', (req: Request, res: Response) => {
 
 app.listen(PORT, () => {
   // tslint:disable-next-line:no-console
-  console.log( `server started at http://localhost:${ PORT }` );
-} );
+  console.log(`server started at http://localhost:${PORT}`);
+});

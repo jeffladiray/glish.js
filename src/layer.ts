@@ -1,4 +1,4 @@
-import { Cell } from './cell';
+import { Cell } from './cell';
 
 export class Layer<T extends Cell> {
   private _matrix: Array<Array<T>>;
@@ -12,19 +12,21 @@ export class Layer<T extends Cell> {
     this.type = type;
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   *[Symbol.iterator]() {
     for (let i = 0; i < this._matrix.length; i++) {
       for (let j = 0; j < this._matrix[i].length; j++) {
-        yield this.getCellAt(i, j);
+        const c: T = this.getCellAt(i, j);
+        yield c;
       }
     }
   }
 
-  initWith(cellFab:(id: number, x: number, y: number) => T) {
+  initWith(cellFab: (id: number, x: number, y: number) => T): void {
     if (this.sizeH >= 0 && this.sizeW >= 0) {
-      let matrix = new Array(this.sizeH).fill(new Array(this.sizeW).fill(0));
+      const matrix = new Array(this.sizeH).fill(new Array(this.sizeW).fill(0));
       this._matrix = matrix.map((c: Array<T>, i: number) => {
-        return c.map((d: T, j: number) => {          
+        return c.map((d: T, j: number) => {
           return cellFab(j + this.sizeW * i, j, i);
         });
       });
@@ -33,13 +35,13 @@ export class Layer<T extends Cell> {
     }
   }
 
-  pushRow(row: Array<T>) {
+  pushRow(row: Array<T>): number {
     return this._matrix.push(row);
   }
 
-  addToRowById(id: number, t: T) {
+  addToRowById(id: number, t: T): void {
     const row = this.getCellsBySpec((c: T) => c.id === id);
-    if(row && row.length > 0) {
+    if (row && row.length > 0) {
       row.push(t);
     }
   }
@@ -57,7 +59,7 @@ export class Layer<T extends Cell> {
   getRandomCell(): T {
     return this.getCellAt(Math.floor(Math.random() * this.sizeW), Math.floor(Math.random() * this.sizeH));
   }
-  
+
   getCellAt(x: number, y: number): T {
     if (x >= this.sizeW || y >= this.sizeH) {
       throw new Error('Invalid x or y parameter');
@@ -66,22 +68,22 @@ export class Layer<T extends Cell> {
   }
 
   getMatrix(): Array<Array<T>> {
-    return this._matrix
+    return this._matrix;
   }
 
   getCellById(id: number): T {
     return this.getCellAt(id % this.sizeW, Math.floor(id / this.sizeW) % this.sizeH);
   }
 
-  updateLayer(subLayer: Layer<T>, startingId: number) {
+  updateLayer(subLayer: Layer<T>, startingId: number): void {
     const initialCell = this.getCellById(startingId);
     for (const c of subLayer) {
       this.getCellAt(c.x + initialCell.x, c.y + initialCell.y);
     }
   }
 
-  getCellNeighbours(b: T): Array<{ position: string, cell: T}> {    
-    let neighbourgs = new Array();
+  getCellNeighbours(b: T): Array<{ position: string; cell: T }> {
+    const neighbourgs = [];
     if (b.x - 1 > 0 && b.y - 1 > 0) {
       const NW = this.getCellAt(b.x - 1, b.y - 1);
       neighbourgs.push({ position: 'NW', cell: NW });
@@ -100,7 +102,7 @@ export class Layer<T extends Cell> {
     }
     if (b.x + 1 < this.sizeW) {
       const E = this.getCellAt(b.x + 1, b.y);
-      neighbourgs.push({ position: 'E', cell: E, });
+      neighbourgs.push({ position: 'E', cell: E });
     }
     if (b.x - 1 >= 0) {
       const W = this.getCellAt(b.x - 1, b.y);
@@ -117,14 +119,12 @@ export class Layer<T extends Cell> {
     return neighbourgs;
   }
 
-
-  toJSON() {
+  toJSON(): { matrix: Array<Array<T>>; sizeH: number; sizeW: number; type: string } {
     return {
       matrix: this._matrix,
       sizeH: this.sizeW,
       sizeW: this.sizeW,
-      type: this.type
-    }
+      type: this.type,
+    };
   }
 }
-

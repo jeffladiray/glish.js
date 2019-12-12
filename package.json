@@ -6,25 +6,32 @@
   "scripts": {
     "dev": "$(yarn bin)/nodemon",
     "test": "$(yarn bin)/mocha -r ts-node/register tests/**/*.test.ts",
+    "lint": "$(yarn bin)/eslint src/*.ts tests/*.ts",
     "build": "rm -rf ./build && tsc",
     "start": "yarn build && node build/index.js"
   },
   "devDependencies": {
     "@types/chai": "^4.2.5",
+    "@types/express": "^4.17.2",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.11",
-    "@types/express": "^4.17.2",
+    "@typescript-eslint/eslint-plugin": "^2.11.0",
+    "@typescript-eslint/parser": "^2.11.0",
     "chai": "^4.2.0",
+    "eslint": "^6.7.2",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "husky": "^3.1.0",
     "mocha": "^6.2.2",
     "nodemon": "^1.19.4",
+    "prettier": "^1.19.1",
     "ts-node": "^8.5.2",
     "typescript": "^3.7.2",
     "typings": "^2.1.1"
   },
   "husky": {
     "hooks": {
-      "pre-push": "npm test"
+      "pre-push": "yarn lint && yarn test"
     }
   },
   "dependencies": {

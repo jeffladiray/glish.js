@@ -12,17 +12,17 @@ describe('Layer', () => {
     expect(matrix.sizeH).to.equal(2);
   });
   it('#getCellAt', () => {
-    expect(matrix.getCellAt(0,0).id).to.equal(0);
-    const cell = matrix.getCellAt(2,1);
+    expect(matrix.getCellAt(0, 0).id).to.equal(0);
+    const cell = matrix.getCellAt(2, 1);
     expect(cell.id).to.equal(5);
     expect(cell.x).to.equal(2);
     expect(cell.y).to.equal(1);
-    const cell2 = matrix.getCellAt(2,0);
+    const cell2 = matrix.getCellAt(2, 0);
     expect(cell2.id).to.equal(2);
     expect(cell2.x).to.equal(2);
     expect(cell2.y).to.equal(0);
 
-    expect(() => matrix.getCellAt(5,5)).to.throw(Error, /x or y/g);
+    expect(() => matrix.getCellAt(5, 5)).to.throw(Error, /x or y/g);
   });
 
   it('#getCellById', () => {

@@ -25,7 +25,10 @@ yarn && yarn test
 
 ## Infos
 
-I'm currenly on adding a CLI to ease the dev of the project
+I'm currenly on :
+
+- Adding a CLI to ease the dev of the project
+- Multiple cell spawnable
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

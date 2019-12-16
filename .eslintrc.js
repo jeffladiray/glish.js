@@ -10,4 +10,12 @@ module.exports =  {
     sourceType:  'module',
   },
   rules:  {},
+  globals: {
+    document: true,
+    window: true,
+  },
+  env: {
+    browser: true,
+    node: true
+  }
 };

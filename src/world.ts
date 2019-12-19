@@ -1,5 +1,7 @@
 import MapSpec from './mapSpec';
 import { Map } from './map';
+import { Spawnable, VolumetricSpawnable } from './constants';
+import { Resource, Vector3 } from './utils';
 
 export default class World {
     cellSize: number;
@@ -9,6 +11,7 @@ export default class World {
     cellSliceSize: number;
     cell: Uint8Array;
     heightMap: Map;
+    maxHeight = 100;
     static FACES = [
         {
             // left
@@ -88,15 +91,21 @@ export default class World {
         this.heightMap = new Map(mapSpec);
 
         for (const cell of this.heightMap.map.content) {
-            let z = cell.content.raw.elevation;
-            if (z < 4) z = 4;
-            for (let i = 0; i < z - 1; i++) {
+            let zH = cell.content.raw.elevation;
+            if (zH > this.maxHeight) zH = this.maxHeight;
+            if (zH < 10) zH = 10;
+            for (let i = 0; i < zH - 1; i++) {
                 this.setVoxel(cell.x, i, cell.y, 1);
             }
-            this.setVoxel(cell.x, z - 1, cell.y, cell.content.biome.resource.position);
-            this.setVoxel(cell.x, z, cell.y, cell.content.biome.resource.position);
-            if (cell.content.item && cell.content.item.type) {
-                this.setVoxel(cell.x, z + 1, cell.y, cell.content.item.resource.position);
+            this.setVoxel(cell.x, zH - 1, cell.y, cell.content.biome.resource.position);
+            this.setVoxel(cell.x, zH, cell.y, cell.content.biome.resource.position);
+
+            if (cell.content.item && cell.content.item instanceof Spawnable) {
+                this.setVoxel(cell.x, zH + 1, cell.y, cell.content.item.resource.position);
+            } else if (cell.content.item && cell.content.item instanceof VolumetricSpawnable) {
+                cell.content.item.voxels.forEach((p: { v: Vector3; type: string; resource: Resource }) => {
+                    this.setVoxel(cell.x + p.v.x, zH + p.v.z, cell.y + p.v.y, p.resource.position);
+                });
             }
         }
     }

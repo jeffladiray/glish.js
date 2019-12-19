@@ -1,27 +1,16 @@
 import { MapBuilder } from '../src/MapBuilder';
 import { expect } from 'chai';
+import MapSpec from '../src/mapSpec';
 
 describe('Chunk', () => {
     it('#constructor', () => {
-        const chunk = new MapBuilder({
-            sizeW: 10,
-            sizeH: 10,
-            baseFrequency: 10,
-            cellSize: 5,
-            computeNoiseWithFrequency: (): number => 0,
-        });
-        expect(chunk.sizeW).equal(10);
+        const chunk = new MapBuilder(new MapSpec(10, 15, 2, 10, 10, 'glish', 10, 10, 10, 10));
+        expect(chunk.sizeW).equal(15);
         expect(chunk.sizeH).equal(10);
-        expect(chunk.cellSize).equal(5);
+        expect(chunk.cellSize).equal(10);
     });
     it('#getBiomeLayer', () => {
-        const chunk = new MapBuilder({
-            sizeW: 10,
-            sizeH: 10,
-            baseFrequency: 10,
-            cellSize: 5,
-            computeNoiseWithFrequency: (): number => 0,
-        });
-        expect(chunk.layers.biome.getCellAt(0, 0).content.type).to.equal('OCEAN_BIOME');
+        const chunk = new MapBuilder(new MapSpec(10, 15, 2, 10, 10, 'glish', 10, 10, 10, 10));
+        expect(chunk.layers.biome.getCellAt(0, 0).content.type).to.equal('GRASS_BIOME');
     });
 });

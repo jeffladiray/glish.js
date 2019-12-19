@@ -4,16 +4,11 @@ import { Cell } from '../src/cell';
 import { RegionTagger } from '../src/region';
 
 import { expect } from 'chai';
+import MapSpec from '../src/mapSpec';
 
 describe('RegionTagger', () => {
     it('#findRegions', () => {
-        const map = new MapBuilder({
-            sizeW: 5,
-            sizeH: 5,
-            baseFrequency: 100,
-            cellSize: 8,
-            computeNoiseWithFrequency: (): number => 0,
-        });
+        const map = new MapBuilder(new MapSpec(10, 15, 2, 10, 10, 'glish', 10, 10, 10, 10));
         const regionTagger = new RegionTagger<Cell>(
             map.layers.biome,
             (a: { position: string; cell: Cell }, b: Cell) => a.cell.content.type === b.content.type,

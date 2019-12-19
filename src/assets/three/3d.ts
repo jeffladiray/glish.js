@@ -5,7 +5,7 @@ import World from '../../world';
 
 import PointerLockControls from './pointerLockControls';
 
-const mapSpec = new MapSpec(128, 128, 10, 256, 10, 'solo', 16, 256, 64);
+const mapSpec = new MapSpec(256, 256, 10, 4096, 10, 'solo', 16, 256, 64);
 
 const m = new World(mapSpec);
 
@@ -41,7 +41,7 @@ window.onload = (): void => {
         renderer = new THREE.WebGLRenderer({ antialias: true });
         scene = new THREE.Scene();
 
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
         camera.position.y = 10;
         scene.add(new THREE.AxesHelper(10));
 
@@ -178,9 +178,9 @@ window.onload = (): void => {
             controls.moveRight(-velocity.x * delta);
             controls.moveForward(-velocity.z * delta);
             controls.getObject().position.y += velocity.y * delta;
-            if (controls.getObject().position.y < 100) {
+            if (controls.getObject().position.y < 290) {
                 velocity.y = 0;
-                controls.getObject().position.y = 100;
+                controls.getObject().position.y = 290;
                 canJump = true;
             }
             prevTime = time;

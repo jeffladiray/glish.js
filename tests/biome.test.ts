@@ -1,6 +1,7 @@
-import { Biome, Resource } from '../src/constants';
+import { Biome } from '../src/constants';
 
 import { expect } from 'chai';
+import { Resource } from '../src/utils';
 
 const biome = new Biome(
     'TEST_BIOME',

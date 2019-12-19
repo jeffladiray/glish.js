@@ -1,8 +1,8 @@
 import { Layer } from './layer';
 import { Cell } from './cell';
-import { BIOME_ARRAY, SPAWN_ARRAY, Biome, Spawnable, Resource } from './constants';
+import { BIOME_ARRAY, SPAWN_ARRAY, Biome, SpawnableInterface } from './constants';
 import { RegionTagger } from './region';
-
+import MapSpec from './mapSpec';
 export class MapBuilder extends Cell {
     static counter = 0;
     id: number;
@@ -10,6 +10,7 @@ export class MapBuilder extends Cell {
     sizeW: number;
     baseFrequency: number;
     cellSize: number;
+    maxHeight: number;
     layers: {
         raw: Layer<Cell>;
         biome: Layer<Cell>;
@@ -17,13 +18,7 @@ export class MapBuilder extends Cell {
         region: Layer<Cell>;
     };
     computeNoiseWithFrequency: (x: number, y: number, octave?: number) => number;
-    constructor(parameters: {
-        sizeW: number;
-        sizeH: number;
-        baseFrequency: number;
-        cellSize: number;
-        computeNoiseWithFrequency: (x: number, y: number, octave?: number) => number;
-    }) {
+    constructor(parameters: MapSpec) {
         super(MapBuilder.counter, {
             x: MapBuilder.counter % parameters.sizeW,
             y: Math.floor(MapBuilder.counter / parameters.sizeH),
@@ -34,6 +29,7 @@ export class MapBuilder extends Cell {
         this.sizeW = parameters.sizeW;
         this.baseFrequency = parameters.baseFrequency;
         this.cellSize = parameters.cellSize;
+        this.maxHeight = parameters.maxHeight;
 
         this.setContent(new Layer<Cell>('map', this.sizeW, this.sizeH));
         this.layers = {
@@ -56,33 +52,22 @@ export class MapBuilder extends Cell {
 
         // generating item info layer
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const computeSpawnables = (l: Layer<Cell>, cellInfo: any): { type: string; resource: Resource } | {} => {
-            const ableToSpawn = SPAWN_ARRAY.filter((s: Spawnable) => s.canSpawn(l, cellInfo));
+        const computeSpawnables = (l: Layer<Cell>, cellInfo: any): SpawnableInterface | {} => {
+            const ableToSpawn = SPAWN_ARRAY.filter((s: SpawnableInterface) => s.canSpawn(l, cellInfo));
             const selectedSpawnable = ableToSpawn[Math.floor(Math.random() * ableToSpawn.length)];
-            if (selectedSpawnable) {
-                return { type: selectedSpawnable.type, resource: selectedSpawnable.resource };
-            }
-            return {};
+            return selectedSpawnable;
         };
 
         console.log('raws ...');
+
         this.layers.raw.initWith((id, x, y) => {
             return new Cell(
                 id,
                 { x, y },
                 {
-                    elevation: Math.floor(
-                        20 *
-                            Math.abs(
-                                parameters.computeNoiseWithFrequency(x, y) +
-                                    parameters.computeNoiseWithFrequency(x, y, 1) +
-                                    parameters.computeNoiseWithFrequency(x, y, 2) +
-                                    parameters.computeNoiseWithFrequency(x, y, 3) +
-                                    parameters.computeNoiseWithFrequency(x, y, 4),
-                            ),
-                    ), // Using perlin
-                    humidity: Math.abs(parameters.computeNoiseWithFrequency(2 * x, 2 * y)),
-                    temperature: y <= this.sizeH / 2 ? (2 * y) / this.sizeH : 1 - y / this.sizeH, // Using linear
+                    elevation: parameters.computeElevation(x, y),
+                    humidity: parameters.computeHumidity(x, y),
+                    temperature: parameters.computeTemperature(x, y),
                 },
             );
         });

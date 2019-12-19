@@ -1,7 +1,7 @@
 import { Layer } from './layer';
 import { Cell } from './cell';
 import { BIOME_ARRAY, SPAWN_ARRAY, Biome, SpawnableInterface } from './constants';
-import { RegionTagger } from './region';
+
 import MapSpec from './mapSpec';
 export class MapBuilder extends Cell {
     static counter = 0;
@@ -86,14 +86,6 @@ export class MapBuilder extends Cell {
             return new Cell(id, { x, y }, computeSpawnables(this.layers.item, content));
         });
 
-        // console.log('regions ...');
-        // // Calculating borders and regions
-        // const regionTagger = new RegionTagger<Cell>(
-        //     this.layers.biome,
-        //     (a: { cell: Cell }, b: Cell) => a.cell.content.type === b.content.type,
-        // );
-        // this.layers.region = regionTagger.iterativeBFS(this.layers.biome);
-
         console.log('finalizing map object');
         this.content.initWith(
             (id: number, x: number, y: number) =>
@@ -104,7 +96,6 @@ export class MapBuilder extends Cell {
                         item: this.layers.item.getCellById(id).content,
                         raw: this.layers.raw.getCellById(id).content,
                         biome: this.layers.biome.getCellById(id).content,
-                        //region: this.layers.region.getCellById(id).content,
                     },
                 ),
         );

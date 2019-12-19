@@ -1,4 +1,4 @@
-import { MapBuilder } from '../src/MapBuilder';
+import { MapBuilder } from '../src/mapBuilder';
 import { expect } from 'chai';
 import MapSpec from '../src/mapSpec';
 

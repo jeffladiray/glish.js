@@ -40,7 +40,8 @@ export default class MapSpec {
     }
 
     computeElevation(x: number, y: number): number {
-        return this.computeFlat(x, y);
+        console.warn(x, y);
+        return this.computeFlat();
     }
 
     computeHumidity(x: number, y: number): number {
@@ -51,7 +52,7 @@ export default class MapSpec {
         return this.computeUsingPerlin(2 * x, 2 * y);
     }
 
-    computeFlat(x: number, y: number): number {
+    computeFlat(): number {
         return 29;
     }
 

@@ -1,4 +1,4 @@
-import { MapBuilder } from '../src/MapBuilder';
+import { MapBuilder } from '../src/mapBuilder';
 import { Cell } from '../src/cell';
 
 import { RegionTagger } from '../src/region';
